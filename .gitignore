@@ -39,3 +39,10 @@ luac.out
 *.x86_64
 *.hex
 
+# Binaries
+lineup-tracker
+*.lua
+*.mod
+
+# Vim things
+*.swp

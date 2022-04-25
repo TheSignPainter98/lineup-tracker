@@ -5,9 +5,6 @@ import insert from table
 
 class Map
 	new: (@name, @zones={}) =>
-	render: (sb=StringBuilder!) =>
-		for zone in *@zones
-			zone\render sb
 	__concat: (zone) =>
 		insert @zones, zone
 		@
@@ -20,14 +17,12 @@ class Map
 
 class Zone
 	new: (@name) =>
-	render: (sb=StringBuilder!) => sb .. @name
 	__tostring: => @name
 	@load: (zone) => Zone zone
 	save: => @name
 
 class Ability
 	new: (@name, @usages={}) =>
-	render: (sb=StringBuilder!) => usage\render sb for usage in *@usages
 	__concat: (usage) =>
 		insert @usages, usage
 		@
@@ -40,14 +35,33 @@ class Ability
 
 class Usage
 	new: (@name) =>
-	render: (sb=StringBuilder!) => sb .. @name
 	__tostring: => @name
 	@load: (usage) => Usage usage
 	save: => @name
 
+class Progress -- (map * zone) * (ability * usage) -> target
+	new: (@maps, @abilities, @data) =>
+		unless @data
+			@data = { map.name, { zone.name, { ability.name, { usage.name, Target! for usage in *ability.usages } for ability in *@abilities } for zone in *map.zones } for map in *@maps }
+	@load: (maps, abilities, data) => Progress maps, abilities, data
+	save: =>
+	new_map: (map) => -- TODO: call me!
+	new_zone: (map, zone) => -- TODO: call me!
+	new_ability: (ability) => -- TODO: call me!
+	new_usage: (ability, usage) => -- TODO: call me!
+	set_progress: (map, zone, ability, usage, progress) => -- TODO: call me!
+		with @_at map, zone, ability, usage
+			.amt = progress
+	set_target: (map, zone, ability, usage, target) => -- TODO: call me!
+		with @_at map, zone, ability, usage
+			.target = target
+	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
+	__tostring: => @render!
+	render: (map, zone, ability, usage) => 'WIP' -- TODO: turn this into a table!
+
 class Target
-	new: (@amt, @target) =>
-	render: (sb=StringBuilder!) => sb .. "#{100 * @amt // @target}%"
+	new: (@amt=0, @target=0) =>
+	render: (sb=StringBuilder!) => "#{100 * (@target != 0 or @amt // @target and 1)}%"
 	__tostring: => @name
 	@load: (target) => Target target.amt, target.target
 	save: => {
@@ -55,4 +69,4 @@ class Target
 		target: @target
 	}
 
-{ :Ability, :Map, :Usage, :Zone }
+{ :Ability, :Map, :Progress, :Usage, :Zone }

@@ -6,7 +6,7 @@ import read, open, stderr, write from io
 import max from math
 import exit from os
 import dump, load from require 'lyaml'
-import Ability, Map, Usage, Zone from require 'model'
+import Ability, Map, Progress, Usage, Zone from require 'model'
 import insert_sorted, named_get, sorted, StringBuilder, Table from require 'util'
 import concat, unpack from table
 
@@ -20,11 +20,13 @@ class ProgState
 	new: =>
 		@maps = {}
 		@abilities = {}
+		@progress = Progress @maps, @abilities
 	save: (file=DEFAULT_SAVE_FILE) =>
 		with open file, 'w+'
 			\write dump {{
 				maps: [ m\save! for m in *@maps ]
 				abilities: [ a\save! for a in *@abilities ]
+				progress: @progress\save!
 			}}
 			\close!
 	load: (file=DEFAULT_SAVE_FILE) =>
@@ -36,6 +38,7 @@ class ProgState
 			return unless data
 			@maps = [ Map\load m for m in *data.maps or {} ]
 			@abilities = [ Ability\load a for a in *data.abilities or {} ]
+			@progress = Progress\load @maps, @abilities, data.progress
 	loop: (args) =>
 		if #args != 0
 			for cmd in *@arg_cmds args
@@ -161,6 +164,7 @@ class ProgState
 					for j,usage in ipairs ability.usages
 						sb ..= "\n\t- #{j}:\t#{usage}"
 				sb!
+		progress: => @progress\render @map, @zone, @ability, @usage
 	cmd_keys: => [ k for k in pairs @cmds ]
 	help:
 		ability: => "Set the current ability to $1"

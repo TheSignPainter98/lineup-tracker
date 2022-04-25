@@ -68,7 +68,7 @@ class Table
 		if @data[1] and #row != #@data[1]
 			error "Added row has wrong number of columns: got #{#row}, expected #{#@data[1]}"
 	__tostring: =>
-		ncols = #@data[1]
+		ncols = #(@data[1] or {})
 		for num,row in ipairs @data
 			if #row != ncols
 				error "Table is not a rectangle: row #{num} has #{#row} fields, expected #{ncols}"

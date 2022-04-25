@@ -138,13 +138,13 @@ class ProgState
 				@problem "Need a kind of data to add!"
 			switch kind\lower!
 				when 'map'
-					insert_sorted @maps, Map name
+					insert_sorted @maps, (Map name), (m) -> m.name
 				when 'zone'
 					unless @map
 						@problem "Cannot set zone without first setting a map!"
 					@map ..= Zone name
 				when 'ability'
-					insert_sorted @abilities, Ability name
+					insert_sorted @abilities, (Ability name), (a) -> a.name
 				when 'usage'
 					unless @ability
 						@problem "Cannot set usage without first setting an ability!"

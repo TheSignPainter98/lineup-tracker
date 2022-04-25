@@ -1,3 +1,5 @@
+local *
+
 import max from math
 import rep from string
 import concat, insert, sort, unpack from table
@@ -64,17 +66,21 @@ class Table
 	__index: (i) => @data[i]
 	row: (i) => @data[i]
 	col: (j) => [ @data[i][j] for i = 1, #@data ]
+	add: (row) => @__add row
 	__add: (row) =>
 		if @data[1] and #row != #@data[1]
 			error "Added row has wrong number of columns: got #{#row}, expected #{#@data[1]}"
+		@data[#@data + 1] = row
 	__tostring: =>
-		ncols = #(@data[1] or {})
+		return '' if #@data == 0
+		ncols = #@data[1]
 		for num,row in ipairs @data
 			if #row != ncols
 				error "Table is not a rectangle: row #{num} has #{#row} fields, expected #{ncols}"
 
 		strtab = [ [ tostring cell for cell in *row ] for row in *@data ]
-		col_lens = [ max unpack [ #cell for cell in *row ] for row in *strtab ]
+		lens = [ [ #cell for cell in *row ] for row in *strtab ]
+		col_lens = [ max unpack [ #strtab[i][j] for i = 1, #strtab ] for j = 1, #strtab[1] ]
 
 		sb = StringBuilder!
 		nrows = #strtab
@@ -114,11 +120,10 @@ class Cell
 		cyan: 6
 		white: 7
 
-insert_sorted = (list, thing, cmp=(a,b) -> a < b) ->
+insert_sorted = (list, thing, key=(v) -> v) ->
 	insertion_point = #list + 1
 	for i = 1, #list
-		print thing, list[i]
-		if cmp thing, list[i]
+		if (key thing) < key list[i]
 			insertion_point = i
 			break
 	insert list, insertion_point, thing

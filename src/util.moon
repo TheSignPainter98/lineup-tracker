@@ -120,10 +120,10 @@ class Cell
 		fg .. bg .. @str .. (' '\rep width) .. '\x1b[0m'
 	__tostring: => @str
 	fg: (fg) => @_fg = @colours[fg]
-	hifg: (hifg) => @_fgi = hifg and 9 or 3
+	hifg: (hifg=true) => @_fgi = hifg and 9 or 3
 	bg: (bg) => @_bg = @colours[bg]
-	hibg: (hibg) => @_bgi = hibg and 10 or 4
-	bold: (bf) => @_bf = bf and 1 or 0
+	hibg: (hibg=true) => @_bgi = hibg and 10 or 4
+	bold: (bf=true) => @_bf = bf and 1 or 0
 	colours:
 		black: 0
 		red: 1

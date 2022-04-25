@@ -134,7 +134,7 @@ class Cell
 		cyan: 6
 		white: 7
 
-insert_sorted = (list, thing, key=(v) -> v) ->
+insert_sorted = (list, thing, key=(v)->v) ->
 	insertion_point = #list + 1
 	for i = 1, #list
 		if (key thing) < key list[i]

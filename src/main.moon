@@ -126,6 +126,7 @@ class ProgState
 			}
 		exit: => EXIT
 		quit: => @cmds.exit @
+		Save: => nil, @save!
 		new: (kind, name) =>
 			unless kind
 				@problem "Need a kind of data to add!"
@@ -169,6 +170,7 @@ class ProgState
 		list: => "List available data, optionally specify the kind"
 		map: => "Set the current map to $1"
 		new: => "Add a new $1 called $2"
+		Save: => "Save changes"
 		state: => "Print the current query state"
 		usage: => "Set the current usage in the current ability to $1"
 		zone: => "Set the current zone in the current map to $1"

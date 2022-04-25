@@ -95,21 +95,35 @@ class Table
 			sb ..= '\n' if rownum != nrows
 		sb!
 
-ansi_escape = (colour, area, category) ->
-	if category
-		"\033[#{category};#{area}#{colour}m"
+ansi_colour = (colour, area, effect) ->
+	if colour
+		if effect
+			"\x1b[#{effect};#{area}#{colour}m"
+		else
+			"\x1b[#{area}#{colour}m"
 	else
-		"\033[#{area}#{colour}m"
+		''
 
 class Cell
 	new: (@str) =>
-		@_fg = ''
-		@_bg = ''
-	render: (width) =>
+		@_fg = nil
+		@_bg = nil
+		@_bf = 0
+		@_fgi = 3
+		@_bgi = 4
+	render: (width=#@str) =>
 		width -= #@str
-		@_fg .. @_bg .. @str .. (' '\rep width) .. '\033[0m'
-	fg: (fg) => @_fg = ansi_escape @colours[fg], 3, 0
-	bg: (bg) => @_bg = ansi_escape @colours[bg], 4
+		fg = ansi_colour @_fg, @_fgi, @_bf
+		if not @_fg and @_bf != 0
+			fg = ansi_colour @colours['white'], @_fgi, @_bf
+		bg = ansi_colour @_bg, @_bgi, @_bgi == 10 and 0 or nil
+		fg .. bg .. @str .. (' '\rep width) .. '\x1b[0m'
+	__tostring: => @str
+	fg: (fg) => @_fg = @colours[fg]
+	hifg: (hifg) => @_fgi = hifg and 9 or 3
+	bg: (bg) => @_bg = @colours[bg]
+	hibg: (hibg) => @_bgi = hibg and 10 or 4
+	bold: (bf) => @_bf = bf and 1 or 0
 	colours:
 		black: 0
 		red: 1

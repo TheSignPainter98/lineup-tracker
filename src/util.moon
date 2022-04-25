@@ -89,6 +89,31 @@ class Table
 			sb ..= '\n' if rownum != nrows
 		sb!
 
+ansi_escape = (colour, area, category) ->
+	if category
+		"\033[#{category};#{area}#{colour}m"
+	else
+		"\033[#{area}#{colour}m"
+
+class Cell
+	new: (@str) =>
+		@_fg = ''
+		@_bg = ''
+	render: (width) =>
+		width -= #@str
+		@_fg .. @_bg .. @str .. (' '\rep width) .. '\033[0m'
+	fg: (fg) => @_fg = ansi_escape @colours[fg], 3, 0
+	bg: (bg) => @_bg = ansi_escape @colours[bg], 4
+	colours:
+		black: 0
+		red: 1
+		green: 2
+		yellow: 3
+		blue: 4
+		purple: 5
+		cyan: 6
+		white: 7
+
 insert_sorted = (list, thing, cmp=(a,b) -> a < b) ->
 	insertion_point = #list + 1
 	for i = 1, #list
@@ -105,4 +130,4 @@ named_get = (list, id) ->
 			return elem
 
 
-{ :insert_sorted, :named_get, :StringBuilder, :sorted, :Table }
+{ :Cell, :insert_sorted, :named_get, :StringBuilder, :sorted, :Table }

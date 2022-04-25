@@ -129,5 +129,32 @@ named_get = (list, id) ->
 		if elem.name == id
 			return elem
 
+is_list = (l) ->
+	type = type
+	if (type l) != 'table'
+		return false
+	maxk = -1
+	for k,_ in pairs l
+		if (type k) != 'number'
+			return false
+		maxk = k if maxk < k
+	maxk == #l
 
-{ :Cell, :insert_sorted, :named_get, :StringBuilder, :sorted, :Table }
+show = (v) ->
+	switch type v
+		when 'boolean', 'nil', 'number', 'thread'
+			tostring(v)
+		when 'function', 'userdata'
+			"(#{tostring(v)})"
+		when 'string'
+			"'#{v}'"
+		when 'table'
+			if 'function' == type v.show
+				return v\show!
+			if is_list v
+				return '[' .. (concat [ show e for e in *v ], ',') .. ']'
+			return '{' .. (concat [ (show e) .. ':' .. show val for e,val in pairs v ], ',') .. '}'
+		else
+			error 'Unknown type', type v
+
+{ :Cell, :insert_sorted, :is_list, :named_get, :StringBuilder, :show, :sorted, :Table }

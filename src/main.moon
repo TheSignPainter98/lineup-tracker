@@ -120,7 +120,10 @@ class ProgState
 				@usage = nil
 				return @problem "Usage requies an ability"
 			@usage = named_get @ability.usages, usage
-		help: => Table sorted [ { cmd, @help[cmd]! } for cmd in pairs @cmds ], (a,b) -> a[1] < b[1]
+		help: =>
+			for cmd in pairs @cmds
+				stderr\write "no help for #{cmd}\n" unless @help[cmd]
+			Table sorted [ { cmd, @help[cmd] and (@help[cmd] @) or '' } for cmd in pairs @cmds ], (a,b) -> a[1] < b[1]
 		state: => Table {
 				{ "Map", @map or 'none' }
 				{ "Zone", @zone or 'none' }
@@ -174,6 +177,7 @@ class ProgState
 		list: => "List available data, optionally specify the kind"
 		map: => "Set the current map to $1"
 		new: => "Add a new $1 called $2"
+		progress: => "Show progress"
 		Save: => "Save changes"
 		state: => "Print the current query state"
 		usage: => "Set the current usage in the current ability to $1"

@@ -1,7 +1,7 @@
 local *
 
-import StringBuilder from require "util"
-import insert from table
+import Cell, StringBuilder, Table from require "util"
+import insert, unpack from table
 
 class Map
 	new: (@name, @zones={}) =>
@@ -57,11 +57,66 @@ class Progress -- (map * zone) * (ability * usage) -> target
 			.target = target
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
 	__tostring: => @render!
-	render: (map, zone, ability, usage) => 'WIP' -- TODO: turn this into a table!
+	render: (map, zone, ability, usage) =>
+		tostring with Table!
+			-- Upper header
+			\add with { '', '' }
+				i = 3
+				for ability in *@abilities
+					cell = with Cell ability.name
+						\hifg!
+						\bold!
+					[i] = cell
+					i += 1
+					for _ = 2,#ability.usages
+						[i] = ''
+						i += 1
+			-- Lower header
+			\add with { '', '' }
+				i = 3
+				for ability in *@abilities
+					for usage in *ability.usages
+						cell = with Cell usage.name
+							\bold!
+							\hifg!
+						[i] = cell
+						i += 1
+
+			-- Table body
+			for map in *@maps
+				row_header = {}
+				row_header[1] = with Cell map.name
+					\bold!
+					\hifg!
+				for zone in *map.zones
+					row_header[2] = with Cell zone.name
+						\bold!
+						\hifg!
+					\add with { unpack row_header }
+						i = 3
+						for ability in *@abilities
+							for usage in *ability.usages
+								[i] = (@_at map, zone, ability, usage)\render!
+								i += 1
+						row_header = { '' }
 
 class Target
-	new: (@amt=0, @target=0) =>
-	render: (sb=StringBuilder!) => "#{100 * (@target != 0 or @amt // @target and 1)}%"
+	new: (@amt=0, @target=1) =>
+	render: =>
+		local text
+		if @target == 0
+			text = "-"
+		else
+			text = "#{@amt}/#{@target}"
+		with Cell text
+			if @target == 0
+				\fg 'blue'
+			else if @amt <= @target / 4
+				\fg 'red'
+			else if @amt < @target
+				\fg 'yellow'
+			else
+				\fg 'green'
 	__tostring: => @name
 	@load: (target) => Target target.amt, target.target
 	save: => {

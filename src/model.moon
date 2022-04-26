@@ -1,5 +1,6 @@
 local *
 
+import problem from require 'status'
 import Coloured, insert_sorted, StringBuilder, Table from require "util"
 import insert, unpack from table
 

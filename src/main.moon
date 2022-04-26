@@ -8,13 +8,46 @@ import exit from os
 import dump, load from require 'lyaml'
 import Ability, Map, Progress, Usage, Zone from require 'model'
 import Coloured, insert_sorted, named_get, sorted, StringBuilder, Table from require 'util'
+import statuses, problem from require 'status'
 import concat, insert, unpack from table
 
 DEFAULT_SAVE_FILE = '.progress.yml'
 
-FAIL = 1
-EXIT = -1
-PASS = 0
+import PASS, FAIL, EXIT from statuses
+
+class Commands
+	new: (@cmds) =>
+	__call: (...) => @execute ...
+	__pairs: => next, @cmds
+	execute: (prog_state, cmd, ...) =>
+		return problem "Missing command" unless cmd
+		if f = @get_cmd cmd
+			ret = (f prog_state, ...)
+			switch type ret
+				when 'nil', 'integer', 'number'
+					ret or PASS
+				else
+					print ret
+					PASS
+		else
+			PASS
+	get_cmd: (cmd) =>
+		if f = @cmds[cmd]
+			return f
+		matching_keys = {}
+		for cmd_key in *@cmd_keys!
+			if cmd_key\match '^' .. cmd
+				insert matching_keys, cmd_key
+		switch #matching_keys
+			when 0
+				stderr\write "Unknown command '#{cmd}'\n"
+				nil
+			when 1
+				@cmds[matching_keys[1]]
+			else
+				stderr\write "Ambiguous command '#{cmd}' can match any of: #{concat matching_keys, ', '}"
+	cmd_keys: => [ k for k in pairs @cmds ]
+
 
 class ProgState
 	new: =>
@@ -108,45 +141,28 @@ class ProgState
 		sb!
 	execute: (cmd, ...) =>
 		return PASS unless cmd
-		cmd = cmd\gsub '-', '_'
-		if f = @get_cmd cmd
-			ret = (f @, ...)
-			switch type ret
-				when 'nil', 'integer', 'number'
-					ret or PASS
-				else
-					print ret
-					PASS
-		else
-			stderr\write "Unknown command '#{cmd}'\n"
-			PASS
-	get_cmd: (cmd) =>
-		if f = @cmds[cmd]
-			return f
-		for cmd_key in *@cmd_keys!
-			if cmd_key\match '^' .. cmd
-				return @cmds[cmd_key]
-	cmds:
+		@cmds cmd, ...
+	cmds: Commands {
 		map: (map) =>
-			return @problem "Specify map!" unless map
+			return problem "Specify map!" unless map
 			@map = named_get @maps, map
 			@zone = nil
 		zone: (zone) =>
 			unless @map
 				@zone = nil
-				return @problem "Zone requires a map"
-			return @problem "Specify zone!" unless zone
+				return problem "Zone requires a map"
+			return problem "Specify zone!" unless zone
 			@zone = named_get @map.zones, zone
 			@usage = nil
 		ability: (ability) =>
-			return @problem "Specify ability" unless ability
+			return problem "Specify ability" unless ability
 			@ability = named_get @abilities, ability
 			@usage = nil
 		usage: (usage) =>
-			return @problem "Specify usage!" unless usage
+			return problem "Specify usage!" unless usage
 			unless @ability
 				@usage = nil
-				return @problem "Usage requies an ability"
+				return problem "Usage requies an ability"
 			@usage = named_get @ability.usages, usage
 		help: =>
 			for cmd in pairs @cmds
@@ -159,39 +175,40 @@ class ProgState
 				{ "Usage", @usage or 'none' }
 			}
 		exit: => EXIT
-		quit: => @cmds.exit @
+		quit: => @cmds @, 'exit'
 		Save: => nil, @save!
-		new: (kind, name) =>
-			return @problem "Need a kind of data to add!" unless kind
-			return @problem "Need a name!" unless name
-			switch kind\lower!
-				when 'map'
+		new: (...) =>
+			cmds = Commands {
+				map: (name) =>
+					return problem "New map needs a name" unless name
 					@map = Map name
 					@progress\new_map @map
-				when 'zone'
-					unless @map
-						@problem "Cannot set zone without first setting a map!"
+				zone: (name) =>
+					return problem "New zone needs a name" unless name
+					return problem "Cannot set zone without first setting a map!" unless @map
 					@zone = Zone name
 					@progress\new_zone @map, @zone
-				when 'ability'
+				ability: (name) =>
+					return problem "New ability needs a name" unless name
 					@ability = Ability name
 					@progress\new_ability @ability
-				when 'usage'
-					unless @ability
-						@problem "Cannot set usage without first setting an ability!"
+				usage: (name) =>
+					return problem "New ability needs a name" unless name
+					problem "Cannot set usage without first setting an ability!" unless @ability
 					@usage = Usage name
 					@progress\new_usage @ability, @usage
+			}
+			cmds @, ...
 		list: (kind) =>
 			if kind
-				if kind\match '^_'
-					return @problem "Invalid data kind: #{kind}\n"
-				valid_kinds =
-					maps: true
-					zones: true
-					abilities: true
-					usages: true
-				return @problem "Unknown data kind #{kind} expected one of: #{concat (sorted [ k for k in pairs valid_kinds ]), ', '}" unless valid_kinds[kind]
-				return concat [ tostring d for d in *@[kind] ], '\n'
+				list_kind = (k) => concat [ tostring d for d in *@[k] ], '\n'
+				kind_commands = Commands {
+					maps: => list_kind @, 'maps'
+					zones: => list_kind @, 'zones'
+					abilities: => list_kind @, 'abilities'
+					usages: => list_kind @, 'usages'
+				}
+				kind_commands @, kind
 			else
 				sb = StringBuilder!
 				sb ..= 'Maps:'
@@ -205,20 +222,19 @@ class ProgState
 					for j,usage in ipairs ability.usages
 						sb ..= "\n\t- #{j}:\t#{usage}"
 				sb!
-		progress: => @progress\render @map, @zone, @ability, @usage
-		update: (what, how_much) =>
-			return @problem "Must specify what to update (progress or target)" unless what
-			return @problem "Must specify an amount to update" unless how_much
+		progress: (...) =>
+			nargs = select '#', ...
+			return @progress\render @map, @zone, @ability, @usage unless 0 < nargs
+			return problem "Must specify what to update (progress or target)" unless 1 <= nargs
+			return problem "Must specify an amount to update" unless 2 <= nargs
 			unless @map and @zone and @ability and @usage
-				return @problem "Must set a map, zone, ability and usage before updating a target!"
-			switch what
-				when 'progress'
-					@progress\set_progress @map, @zone, @ability, @progress, how_much
-				when 'target'
-					@progress\set_target @map, @zone, @ability, @progress, how_much
-				else
-					@problem "Cannot update target #{what}: expected one of progress, target"
-	cmd_keys: => [ k for k in pairs @cmds ]
+				return problem "Must set a map, zone, ability and usage before updating a target!"
+			update_commands = Commands {
+				progress: (how_much) => @progress\set_progress @map, @zone, @ability, @progress, how_much
+				target: (how_much) => @progress\set_target @map, @zone, @ability, @progress, how_much
+			}
+			update_commands ...
+	}
 	help:
 		ability: => "Set the current ability to $1"
 		exit: => "Exit the program"
@@ -232,9 +248,6 @@ class ProgState
 		state: => "Print the current query state"
 		usage: => "Set the current usage in the current ability to $1"
 		zone: => "Set the current zone in the current map to $1"
-	problem: (msg, fatal=false) =>
-		stderr\write msg .. '\n'
-		fatal and FAIL or PASS
 
 main = (...) ->
 	local rc

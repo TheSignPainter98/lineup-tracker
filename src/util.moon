@@ -71,7 +71,8 @@ class Table
 		if @data[1] and #row != #@data[1]
 			error "Added row has wrong number of columns: got #{#row}, expected #{#@data[1]}"
 		@data[#@data + 1] = row
-	__tostring: =>
+	__tostring: => @render!
+	render: =>
 		return '' if #@data == 0
 		ncols = #@data[1]
 		for num,row in ipairs @data
@@ -84,13 +85,13 @@ class Table
 
 		sb = StringBuilder!
 		nrows = #strtab
-		for rownum, row in ipairs strtab
+		for rownum, row in ipairs @data
 			for col,cell in ipairs row
 				switch type cell
 					when 'table'
-						sb ..= cell\render col_lens[col]
+						sb ..= cell\render MARGIN + col_lens[col]
 					else
-						sb ..= cell
+						sb ..= tostring cell
 						sb ..= ' '\rep MARGIN + col_lens[col] - #cell
 			sb ..= '\n' if rownum != nrows
 		sb!

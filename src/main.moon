@@ -83,15 +83,16 @@ class ProgState
 		else
 			while true
 				write @prompt!
-				resp = read!
+				resp = read! -- TODO add semicolon suppore!
 				unless resp
 					print!
 					return 0
-				switch @execute unpack [ w for w in resp\gmatch '%s*([^%s]+)' ]
-					when FAIL
-						return 1
-					when EXIT
-						return 0
+				for cmd in resp\gmatch '%s*([^;]*);*'
+					switch @execute unpack [ w for w in cmd\gmatch '%s*([^%s]+)' ]
+						when FAIL
+							return 1
+						when EXIT
+							return 0
 			0
 	arg_cmds: (args) =>
 		list = {}

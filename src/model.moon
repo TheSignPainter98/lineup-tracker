@@ -43,14 +43,27 @@ class Progress -- (map * zone) * (ability * usage) -> target
 	new: (@maps, @abilities, @data) =>
 		unless @data
 			@data = { map.name, { zone.name, { ability.name, { usage.name, Target! for usage in *ability.usages } for ability in *@abilities } for zone in *map.zones } for map in *@maps }
-			-- TODO: deserialise the targets!
-	@load: (maps, abilities, data) => Progress maps, abilities, data
-	save: => -- TODO: serialise me!
-	-- TODO: add stub targets into the gaps!
-	new_map: (map) => insert_sorted @maps, map, (m) -> m.name
-	new_zone: (map, zone) => map ..= zone
-	new_ability: (ability) => insert_sorted @abilities, ability, (a) -> a.name
-	new_usage: (ability, usage) => ability ..= usage
+	@load: (maps, abilities, data) =>
+		data = { map_name, { zone_name, { ability_name, { usage_name, Target\load target for usage_name,target in pairs usages } for ability_name,usages in pairs abilities } for zone_name,abilities in pairs zones } for map_name,zones in pairs data }
+		Progress maps, abilities, data
+	save: => { map_name, { zone_name, { ability_name, { usage_name, target\save! for usage_name,target in pairs usages } for ability_name,usages in pairs abilities } for zone_name,abilities in pairs zones } for map_name,zones in pairs @data }
+	new_map: (map) =>
+		insert_sorted @maps, map, (m) -> m.name
+		@data[map.name] = {}
+	new_zone: (map, zone) =>
+		map ..= zone
+		@data[map.name][zone.name] = { ability.name, { usage.name, Target! for usage in *ability.usages } for ability in *@abilities }
+	new_ability: (ability) =>
+		insert_sorted @abilities, ability, (a) -> a.name
+		for map in *@maps
+			for zone in *map.zones
+				print map.name, zone.name, @data[map.name][zone.name]
+				@data[map.name][zone.name][ability.name] = {}
+	new_usage: (ability, usage) =>
+		ability ..= usage
+		for map in *@maps
+			for zone in *map.zones
+				@data[map.name][zone.name][ability.name][usage.name] = Target!
 	set_progress: (map, zone, ability, usage, progress) =>
 		with @_at map, zone, ability, usage
 			.amt = progress

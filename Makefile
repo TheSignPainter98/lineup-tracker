@@ -28,7 +28,7 @@ lineup-tracker: $(LUA_OBJS)
 %.moon:
 
 clean:
-	rm -f src/*.o src/*.mod src/*.lua
+	rm -f src/*.o src/*.mod src/*.lua lineup-tracker
 .PHONY: clean
 
 count:

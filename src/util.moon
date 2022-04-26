@@ -112,6 +112,7 @@ class Coloured
 		@_bf = 0
 		@_fgi = 3
 		@_bgi = 4
+		@@uncolours = { v, k for k, v in pairs @colours } unless @@uncolours
 	render: (width=#@str) =>
 		width -= #@str
 		fg = ansi_colour @_fg, @_fgi, @_bf
@@ -125,6 +126,15 @@ class Coloured
 	bg: (bg) => @_bg = @colours[bg]
 	hibg: (hibg=true) => @_bgi = hibg and 10 or 4
 	bold: (bf=true) => @_bf = bf and 1 or 0
+	get: (field) =>
+		fields = {
+			fg: -> @@uncolours[@_fg]
+			bg: -> @@uncolours[@_bg]
+			bf: -> @_bf != 0
+			fgi: -> @_fgi != 3
+			bgi: -> @_bgi != 4
+		}
+		fields[field]!
 	colours:
 		black: 0
 		red: 1

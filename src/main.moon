@@ -7,8 +7,8 @@ import max from math
 import exit from os
 import dump, load from require 'lyaml'
 import Ability, Map, Progress, Usage, Zone from require 'model'
-import insert_sorted, named_get, sorted, StringBuilder, Table from require 'util'
-import concat, unpack from table
+import Coloured, insert_sorted, named_get, sorted, StringBuilder, Table from require 'util'
+import concat, insert, unpack from table
 
 DEFAULT_SAVE_FILE = '.progress.yml'
 
@@ -49,7 +49,7 @@ class ProgState
 						0
 		else
 			while true
-				write @prompt! .. " "
+				write @prompt!
 				resp = read!
 				unless resp
 					print!
@@ -73,14 +73,38 @@ class ProgState
 				cmd[#cmd + 1] = arg
 		list[#list + 1] = cmd if cmd
 		list
-	prompt_end: '$'
+	prompt_end: ' '
+	prompt_inter: ''
+	prompt_initial: ' '
 	prompt: =>
 		sb = StringBuilder!
-		sb ..= @map
-		sb ..= ":#{@zone}" if @zone
-		sb ..= ":#{@ability}" if @ability
-		sb ..= ":#{@usage}" if @usage
-		sb ..= @prompt_end
+		prompt_data = {}
+		if @map
+			insert prompt_data, with Coloured " #{@map} "
+				\bg 'green'
+		if @zone
+			insert prompt_data, with Coloured " #{@zone} "
+				\bg 'blue'
+		if @ability
+			insert prompt_data, with Coloured " #{@ability} "
+				\bg 'cyan'
+		if @usage
+			insert prompt_data, with Coloured " #{@usage} "
+				\bg 'purple'
+		prompt_parts = {}
+		n = #prompt_data
+		for i = 1, n
+			if 2 <= i
+				insert prompt_parts, with Coloured @prompt_inter
+					prv = prompt_data[i-1]
+					curr = prompt_data[i]
+					\fg prv\get 'bg'
+					\bg curr\get 'bg'
+			insert prompt_parts, prompt_data[i]
+		insert prompt_parts, with Coloured @prompt_end
+			last = prompt_data[n]
+			\fg last and (last\get 'bg') or 'cyan'
+		sb ..= part\render! for part in *prompt_parts
 		sb!
 	execute: (cmd, ...) =>
 		return PASS unless cmd

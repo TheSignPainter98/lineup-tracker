@@ -138,17 +138,21 @@ class ProgState
 				@problem "Need a kind of data to add!"
 			switch kind\lower!
 				when 'map'
-					insert_sorted @maps, (Map name), (m) -> m.name
+					@map = Map name
+					insert_sorted @maps, @map, (m) -> m.name
 				when 'zone'
 					unless @map
 						@problem "Cannot set zone without first setting a map!"
-					@map ..= Zone name
+					@zone = Zone name
+					@map ..= @zone
 				when 'ability'
-					insert_sorted @abilities, (Ability name), (a) -> a.name
+					@ability = Ability name
+					insert_sorted @abilities, @ability, (a) -> a.name
 				when 'usage'
 					unless @ability
 						@problem "Cannot set usage without first setting an ability!"
-					@ability ..= Usage name
+					@usage = Usage name
+					@ability ..= @usage
 		list: (kind) =>
 			if kind
 				if kind\match '^_'

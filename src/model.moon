@@ -1,6 +1,6 @@
 local *
 
-import Coloured, StringBuilder, Table from require "util"
+import Coloured, insert_sorted, StringBuilder, Table from require "util"
 import insert, unpack from table
 
 class Map
@@ -43,16 +43,18 @@ class Progress -- (map * zone) * (ability * usage) -> target
 	new: (@maps, @abilities, @data) =>
 		unless @data
 			@data = { map.name, { zone.name, { ability.name, { usage.name, Target! for usage in *ability.usages } for ability in *@abilities } for zone in *map.zones } for map in *@maps }
+			-- TODO: deserialise the targets!
 	@load: (maps, abilities, data) => Progress maps, abilities, data
-	save: =>
-	new_map: (map) => -- TODO: call me!
-	new_zone: (map, zone) => -- TODO: call me!
-	new_ability: (ability) => -- TODO: call me!
-	new_usage: (ability, usage) => -- TODO: call me!
-	set_progress: (map, zone, ability, usage, progress) => -- TODO: call me!
+	save: => -- TODO: serialise me!
+	-- TODO: add stub targets into the gaps!
+	new_map: (map) => insert_sorted @maps, map, (m) -> m.name
+	new_zone: (map, zone) => map ..= zone
+	new_ability: (ability) => insert_sorted @abilities, ability, (a) -> a.name
+	new_usage: (ability, usage) => ability ..= usage
+	set_progress: (map, zone, ability, usage, progress) =>
 		with @_at map, zone, ability, usage
 			.amt = progress
-	set_target: (map, zone, ability, usage, target) => -- TODO: call me!
+	set_target: (map, zone, ability, usage, target) =>
 		with @_at map, zone, ability, usage
 			.target = target
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]

@@ -163,24 +163,30 @@ class ProgState
 			switch kind\lower!
 				when 'map'
 					@map = Map name
-					insert_sorted @maps, @map, (m) -> m.name
+					@progress\new_map @map
 				when 'zone'
 					unless @map
 						@problem "Cannot set zone without first setting a map!"
 					@zone = Zone name
-					@map ..= @zone
+					@progress\new_zone @map, @zone
 				when 'ability'
 					@ability = Ability name
-					insert_sorted @abilities, @ability, (a) -> a.name
+					@progress\new_ability @ability
 				when 'usage'
 					unless @ability
 						@problem "Cannot set usage without first setting an ability!"
 					@usage = Usage name
-					@ability ..= @usage
+					@progress\new_usage @ability, @usage
 		list: (kind) =>
 			if kind
 				if kind\match '^_'
-					@problem "Invalid data kind: #{kind}\n"
+					return @problem "Invalid data kind: #{kind}\n"
+				valid_kinds =
+					maps: true
+					zones: true
+					abilities: true
+					usages: true
+				return @problem "Unknown data kind #{kind} expected one of: #{concat (sorted [ k for k in pairs valid_kinds ]), ', '}" unless valid_kinds[kind]
 				return concat [ tostring d for d in *@[kind] ], '\n'
 			else
 				sb = StringBuilder!
@@ -196,6 +202,16 @@ class ProgState
 						sb ..= "\n\t- #{j}:\t#{usage}"
 				sb!
 		progress: => @progress\render @map, @zone, @ability, @usage
+		update: (what, how_much) =>
+			unless @map and @zone and @ability and @usage
+				return @problem "Must set a map, zone, ability and usage before updating a target!"
+			switch what
+				when 'progress'
+					@progress\set_progress @map, @zone, @ability, @progress, how_much
+				when 'target'
+					@progress\set_target @map, @zone, @ability, @progress, how_much
+				else
+					@problem "Cannot update target #{what}: expected one of progress, target"
 	cmd_keys: => [ k for k in pairs @cmds ]
 	help:
 		ability: => "Set the current ability to $1"

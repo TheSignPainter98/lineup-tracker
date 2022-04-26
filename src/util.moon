@@ -105,7 +105,7 @@ ansi_colour = (colour, area, effect) ->
 	else
 		''
 
-class Cell
+class Coloured
 	new: (@str) =>
 		@_fg = nil
 		@_bg = nil
@@ -177,4 +177,4 @@ show = (v) ->
 		else
 			error 'Unknown type', type v
 
-{ :Cell, :insert_sorted, :is_list, :named_get, :StringBuilder, :show, :sorted, :Table }
+{ :Coloured, :insert_sorted, :is_list, :named_get, :StringBuilder, :show, :sorted, :Table }

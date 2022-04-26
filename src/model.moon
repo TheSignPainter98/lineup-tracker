@@ -1,6 +1,6 @@
 local *
 
-import Cell, StringBuilder, Table from require "util"
+import Coloured, StringBuilder, Table from require "util"
 import insert, unpack from table
 
 class Map
@@ -63,7 +63,7 @@ class Progress -- (map * zone) * (ability * usage) -> target
 			\add with { '', '' }
 				i = 3
 				for ability in *@abilities
-					cell = with Cell ability.name
+					cell = with Coloured ability.name
 						\hifg!
 						\bold!
 					[i] = cell
@@ -76,7 +76,7 @@ class Progress -- (map * zone) * (ability * usage) -> target
 				i = 3
 				for ability in *@abilities
 					for usage in *ability.usages
-						cell = with Cell usage.name
+						cell = with Coloured usage.name
 							\bold!
 							\hifg!
 						[i] = cell
@@ -85,11 +85,11 @@ class Progress -- (map * zone) * (ability * usage) -> target
 			-- Table body
 			for map in *@maps
 				row_header = {}
-				row_header[1] = with Cell map.name
+				row_header[1] = with Coloured map.name
 					\bold!
 					\hifg!
 				for zone in *map.zones
-					row_header[2] = with Cell zone.name
+					row_header[2] = with Coloured zone.name
 						\bold!
 						\hifg!
 					\add with { unpack row_header }
@@ -108,7 +108,7 @@ class Target
 			text = "-"
 		else
 			text = "#{@amt}/#{@target}"
-		with Cell text
+		with Coloured text
 			if @target == 0
 				\fg 'blue'
 			else if @amt <= @target / 4

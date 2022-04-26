@@ -128,18 +128,22 @@ class ProgState
 				return @cmds[cmd_key]
 	cmds:
 		map: (map) =>
+			return @problem "Specify map!" unless map
 			@map = named_get @maps, map
 			@zone = nil
 		zone: (zone) =>
 			unless @map
 				@zone = nil
 				return @problem "Zone requires a map"
+			return @problem "Specify zone!" unless zone
 			@zone = named_get @map.zones, zone
 			@usage = nil
 		ability: (ability) =>
+			return @problem "Specify ability" unless ability
 			@ability = named_get @abilities, ability
 			@usage = nil
 		usage: (usage) =>
+			return @problem "Specify usage!" unless usage
 			unless @ability
 				@usage = nil
 				return @problem "Usage requies an ability"
@@ -158,8 +162,8 @@ class ProgState
 		quit: => @cmds.exit @
 		Save: => nil, @save!
 		new: (kind, name) =>
-			unless kind
-				@problem "Need a kind of data to add!"
+			return @problem "Need a kind of data to add!" unless kind
+			return @problem "Need a name!" unless name
 			switch kind\lower!
 				when 'map'
 					@map = Map name
@@ -203,6 +207,8 @@ class ProgState
 				sb!
 		progress: => @progress\render @map, @zone, @ability, @usage
 		update: (what, how_much) =>
+			return @problem "Must specify what to update (progress or target)" unless what
+			return @problem "Must specify an amount to update" unless how_much
 			unless @map and @zone and @ability and @usage
 				return @problem "Must set a map, zone, ability and usage before updating a target!"
 			switch what

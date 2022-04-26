@@ -229,10 +229,10 @@ class ProgState
 			unless @map and @zone and @ability and @usage
 				return problem "Must set a map, zone, ability and usage before updating a target!"
 			update_commands = Commands {
-				progress: (how_much) => @progress\set_progress @map, @zone, @ability, @progress, how_much
-				target: (how_much) => @progress\set_target @map, @zone, @ability, @progress, how_much
+				progress: (how_much) => @progress\set_progress @map, @zone, @ability, @usage, how_much
+				target: (how_much) => @progress\set_target @map, @zone, @ability, @usage, how_much
 			}
-			update_commands ...
+			update_commands @, ...
 	}
 	help:
 		ability: => "Set the current ability to $1"

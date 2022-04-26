@@ -1,8 +1,10 @@
 local *
 
-import problem from require 'status'
+import problem, statuses from require 'status'
 import Coloured, insert_sorted, StringBuilder, Table from require "util"
 import insert, unpack from table
+
+import PASS from statuses
 
 class Map
 	new: (@name, @zones={}) =>
@@ -67,14 +69,29 @@ class Progress -- (map * zone) * (ability * usage) -> target
 				@data[map.name][zone.name][ability.name][usage.name] = Target!
 	set_progress: (map, zone, ability, usage, progress) =>
 		n = tonumber progress
-		return problem "Progress amount must be a number: could not parse '#{progress}'" unless n
 		with @_at map, zone, ability, usage
-			.amt = n
+			switch progress
+				when '+'
+					.amt += 1
+				when '-'
+					.amt -= 1
+				else
+					return problem "Progress amount must be a number: could not parse '#{progress}'" unless n
+					.amt = n
+		PASS
 	set_target: (map, zone, ability, usage, target) =>
+		target = target\lower!
 		n = tonumber target
-		return problem "Target amount must be a number: could not parse '#{target}'" unless n
 		with @_at map, zone, ability, usage
-			.target = n
+			switch target
+				when '+'
+					.target += 1
+				when '-'
+					.target -= 1
+				else
+					return problem "Target amount must be a number: could not parse '#{target}'" unless n
+					.target = n
+		PASS
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
 	__tostring: => @render!
 	render: (map, zone, ability, usage) =>

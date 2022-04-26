@@ -136,7 +136,7 @@ class ProgState
 			insert prompt_parts, prompt_data[i]
 		insert prompt_parts, with Coloured @prompt_end
 			last = prompt_data[n]
-			\fg last and (last\get 'bg') or 'cyan'
+			\fg last and (last\get 'bg') or 'yellow'
 		sb ..= part\render! for part in *prompt_parts
 		sb!
 	execute: (cmd, ...) =>

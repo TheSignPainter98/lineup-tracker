@@ -49,13 +49,13 @@ class Progress -- (map * zone) * (ability * usage) -> target
 		Progress maps, abilities, data
 	save: => { map_name, { zone_name, { ability_name, { usage_name, target\save! for usage_name,target in pairs usages } for ability_name,usages in pairs abilities } for zone_name,abilities in pairs zones } for map_name,zones in pairs @data }
 	new_map: (map) =>
-		insert_sorted @maps, map, (m) -> m.name
+		insert_sorted @maps, map, (m) -> m.name\lower!
 		@data[map.name] = {}
 	new_zone: (map, zone) =>
 		map ..= zone
 		@data[map.name][zone.name] = { ability.name, { usage.name, Target! for usage in *ability.usages } for ability in *@abilities }
 	new_ability: (ability) =>
-		insert_sorted @abilities, ability, (a) -> a.name
+		insert_sorted @abilities, ability, (a) -> a.name\lower!
 		for map in *@maps
 			for zone in *map.zones
 				print map.name, zone.name, @data[map.name][zone.name]

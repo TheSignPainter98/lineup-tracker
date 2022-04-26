@@ -66,11 +66,15 @@ class Progress -- (map * zone) * (ability * usage) -> target
 			for zone in *map.zones
 				@data[map.name][zone.name][ability.name][usage.name] = Target!
 	set_progress: (map, zone, ability, usage, progress) =>
+		n = tonumber progress
+		return problem "Progress amount must be a number: could not parse '#{progress}'" unless n
 		with @_at map, zone, ability, usage
-			.amt = progress
+			.amt = n
 	set_target: (map, zone, ability, usage, target) =>
+		n = tonumber target
+		return problem "Target amount must be a number: could not parse '#{target}'" unless n
 		with @_at map, zone, ability, usage
-			.target = target
+			.target = n
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
 	__tostring: => @render!
 	render: (map, zone, ability, usage) =>

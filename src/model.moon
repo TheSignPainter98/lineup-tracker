@@ -45,7 +45,7 @@ class Progress -- (map * zone) * (ability * usage) -> target
 		unless @data
 			@data = { map.name, { zone.name, { ability.name, { usage.name, Target! for usage in *ability.usages } for ability in *@abilities } for zone in *map.zones } for map in *@maps }
 	@load: (maps, abilities, data) =>
-		data = { map_name, { zone_name, { ability_name, { usage_name, Target\load target for usage_name,target in pairs usages } for ability_name,usages in pairs abilities } for zone_name,abilities in pairs zones } for map_name,zones in pairs data }
+		data = { map_name, { zone_name, { ability_name, { usage_name, Target\load target for usage_name,target in pairs usages } for ability_name,usages in pairs abilities } for zone_name,abilities in pairs zones } for map_name,zones in pairs data } if data
 		Progress maps, abilities, data
 	save: => { map_name, { zone_name, { ability_name, { usage_name, target\save! for usage_name,target in pairs usages } for ability_name,usages in pairs abilities } for zone_name,abilities in pairs zones } for map_name,zones in pairs @data }
 	new_map: (map) =>
@@ -137,7 +137,7 @@ class Target
 				\fg 'yellow'
 			else
 				\fg 'green'
-	__tostring: => @name
+	__tostring: => "#{@amt}/#{@target}"
 	@load: (target) => Target target.amt, target.target
 	save: => {
 		amt: @amt

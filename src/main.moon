@@ -153,7 +153,6 @@ class ProgState
 				return problem "Zone requires a map"
 			return problem "Specify zone!" unless zone
 			@zone = named_get @map.zones, zone
-			@usage = nil
 		ability: (ability) =>
 			return problem "Specify ability" unless ability
 			@ability = named_get @abilities, ability

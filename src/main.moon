@@ -1,7 +1,3 @@
-import currentdir from require 'lfs'
-package.path ..= ";#{currentdir!}/src/?.o"
--- package.path ..= ";#{currentdir!}/src/?.moon"
-
 import read, open, stderr, write from io
 import max from math
 import exit from os

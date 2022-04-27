@@ -242,18 +242,24 @@ class ProgState
 		progress: (...) =>
 			nargs = select '#', ...
 			return @progress\render @map, @zone, @ability, @usage unless 0 < nargs
-			return problem "Must specify what to update (progress or target)" unless 1 <= nargs
-			return problem "Must specify an amount to update" unless 2 <= nargs
-			unless @map and @zone and @ability and @usage
-				return problem "Must set a map, zone, ability and usage before updating a target!"
+			update_command = (f) -> (...) ->
+				return problem "Must specify what to update (progress or target)" unless 1 <= nargs
+				return problem "Must specify an amount to update" unless 2 <= nargs
+				unless @map and @zone and @ability and @usage
+					return problem "Must set a map, zone, ability and usage before updating a target!"
+				f ...
 			update_commands = Commands {
-				progress: (how_much) => @progress\set_progress @map, @zone, @ability, @usage, how_much
-				target: (how_much) => @progress\set_target @map, @zone, @ability, @usage, how_much
+				progress: (how_much) => (update_command -> @progress\set_progress @map, @zone, @ability, @usage, how_much)!
+				target: (how_much) => (update_command -> @progress\set_target @map, @zone, @ability, @usage, how_much)!
 			}, {
 				progress: => "Set progress to a specified amount or +/- to increment/decrement existing value"
 				target: => "Set target to a specified amount or +/- to increment/decrement existing value"
 			}
 			update_commands @, ...
+		'+': => @execute 'progress', 'progress', '+'
+		'-': => @execute 'progress', 'progress', '-'
+		'>': => @execute 'progress', 'target', '+'
+		'<': => @execute 'progress', 'target', '-'
 	}, {
 		ability: => "Set the current ability to $1"
 		exit: => "Exit the program"
@@ -267,6 +273,11 @@ class ProgState
 		state: => "Print the current query state"
 		usage: => "Set the current usage in the current ability to $1"
 		zone: => "Set the current zone in the current map to $1"
+		'+': => "Alias, executes 'progress progress +'"
+		'-': => "Alias, executes 'progress progress -'"
+		'>': => "Alias, executes 'progress target +'"
+		'<': => "Alias, executes 'progress target -'"
+	}
 
 main = (...) ->
 	local rc

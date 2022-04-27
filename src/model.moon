@@ -1,7 +1,7 @@
 local *
 
 import problem, statuses from require 'status'
-import Coloured, insert_sorted, StringBuilder, Table from require "util"
+import eq, Coloured, insert_sorted, StringBuilder, Table from require "util"
 import insert, unpack from table
 
 import PASS from statuses
@@ -66,7 +66,8 @@ class Progress -- (map * zone) * (ability * usage) -> target
 		for map in *@maps
 			for zone in *map.zones
 				@data[map.name][zone.name][ability.name][usage.name] = Target!
-	set_progress: (map, zone, ability, usage, progress) =>
+	set_progress: (query_state, progress) =>
+		import map, zone, ability, usage from query_state
 		n = tonumber progress
 		with @_at map, zone, ability, usage
 			switch progress
@@ -78,7 +79,8 @@ class Progress -- (map * zone) * (ability * usage) -> target
 					return problem "Progress amount must be a number: could not parse '#{progress}'" unless n
 					.amt = n
 		PASS
-	set_target: (map, zone, ability, usage, target) =>
+	set_target: (query_state, target) =>
+		import map, zone, ability, usage from query_state
 		target = target\lower!
 		n = tonumber target
 		with @_at map, zone, ability, usage
@@ -93,8 +95,7 @@ class Progress -- (map * zone) * (ability * usage) -> target
 		PASS
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
 	__tostring: => @render!
-	render: (map, zone, ability, usage) =>
-		return unless 0 < #@abilities or 0 < #@maps
+	render: (query_state) =>
 		tostring with Table!
 			-- Upper header
 			\add with { '', '' }
@@ -134,6 +135,9 @@ class Progress -- (map * zone) * (ability * usage) -> target
 						for ability in *@abilities
 							for usage in *ability.usages
 								[i] = (@_at map, zone, ability, usage)\render!
+								if eq query_state, { :map, :zone, :ability, :usage }
+									[i]\bg 'white'
+									[i]\bold!
 								i += 1
 						row_header = { '' }
 

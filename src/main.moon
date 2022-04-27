@@ -53,9 +53,18 @@ class Commands
 			stderr\write "no help for #{cmd}\n" unless @help[cmd]
 		Table sorted [ { cmd, @help[cmd] and (@help[cmd] @) or '' } for cmd in pairs @cmds ], (a,b) -> a[1] < b[1]
 
+class QueryState
+	new: () => @reset!
+	reset: =>
+		@map = nil
+		@zone = nil
+		@ability = nil
+		@usage = nil
+	is_complete: => @map and @zone and @ability and @usage
 
 class ProgState
 	new: =>
+		@query_state = QueryState!
 		@maps = {}
 		@abilities = {}
 		@progress = Progress @maps, @abilities
@@ -118,17 +127,17 @@ class ProgState
 	prompt: =>
 		sb = StringBuilder!
 		prompt_data = {}
-		if @map
-			insert prompt_data, with Coloured " #{@map} "
+		if @query_state.map
+			insert prompt_data, with Coloured " #{@query_state.map} "
 				\bg 'green'
-		if @zone
-			insert prompt_data, with Coloured " #{@zone} "
+		if @query_state.zone
+			insert prompt_data, with Coloured " #{@query_state.zone} "
 				\bg 'blue'
-		if @ability
-			insert prompt_data, with Coloured " #{@ability} "
+		if @query_state.ability
+			insert prompt_data, with Coloured " #{@query_state.ability} "
 				\bg 'cyan'
-		if @usage
-			insert prompt_data, with Coloured " #{@usage} "
+		if @query_state.usage
+			insert prompt_data, with Coloured " #{@query_state.usage} "
 				\bg 'purple'
 		prompt_parts = {}
 		n = #prompt_data
@@ -151,34 +160,30 @@ class ProgState
 	cmds: Commands {
 		map: (map) =>
 			return problem "Specify map!" unless map
-			@map = named_get @maps, map
-			@zone = nil
+			@query_state.map = named_get @maps, map
+			@query_state.zone = nil
 		zone: (zone) =>
-			unless @map
-				@zone = nil
+			unless @query_state.map
+				@query_state.zone = nil
 				return problem "Zone requires a map"
 			return problem "Specify zone!" unless zone
-			@zone = named_get @map.zones, zone
+			@query_state.zone = named_get @query_state.map.zones, zone
 		ability: (ability) =>
 			return problem "Specify ability" unless ability
-			@ability = named_get @abilities, ability
-			@usage = nil
+			@query_state.ability = named_get @abilities, ability
+			@query_state.usage = nil
 		usage: (usage) =>
 			return problem "Specify usage!" unless usage
-			unless @ability
-				@usage = nil
+			unless @query_state.ability
+				@query_state.usage = nil
 				return problem "Usage requies an ability"
-			@usage = named_get @ability.usages, usage
-		reset: =>
-			@map = nil
-			@zone = nil
-			@ability = nil
-			@usage = nil
+			@query_state.usage = named_get @query_state.ability.usages, usage
+		reset: => @query_state\reset!
 		state: => Table {
-				{ "Map", @map or 'none' }
-				{ "Zone", @zone or 'none' }
-				{ "Ability", @ability or 'none' }
-				{ "Usage", @usage or 'none' }
+				{ "Map", @query_state.map or 'none' }
+				{ "Zone", @query_state.zone or 'none' }
+				{ "Ability", @query_state.ability or 'none' }
+				{ "Usage", @query_state.usage or 'none' }
 			}
 		exit: => EXIT
 		quit: => @cmds @, 'exit'
@@ -187,22 +192,22 @@ class ProgState
 			cmds = Commands {
 				map: (name) =>
 					return problem "New map needs a name" unless name
-					@map = Map name
-					@progress\new_map @map
+					@query_state.map = Map name
+					@progress\new_map @query_state.map
 				zone: (name) =>
 					return problem "New zone needs a name" unless name
-					return problem "Cannot set zone without first setting a map!" unless @map
-					@zone = Zone name
-					@progress\new_zone @map, @zone
+					return problem "Cannot set zone without first setting a map!" unless @query_state.map
+					@query_state.zone = Zone name
+					@progress\new_zone @query_state.map, @query_state.zone
 				ability: (name) =>
 					return problem "New ability needs a name" unless name
-					@ability = Ability name
-					@progress\new_ability @ability
+					@query_state.ability = Ability name
+					@progress\new_ability @query_state.ability
 				usage: (name) =>
 					return problem "New ability needs a name" unless name
-					problem "Cannot set usage without first setting an ability!" unless @ability
-					@usage = Usage name
-					@progress\new_usage @ability, @usage
+					problem "Cannot set usage without first setting an ability!" unless @query_state.ability
+					@query_state.usage = Usage name
+					@progress\new_usage @query_state.ability, @query_state.usage
 			}, {
 				map: => 'Create a new map'
 				zone: => 'Create a new zone in the current map'
@@ -214,14 +219,14 @@ class ProgState
 			if kind
 				list_kind = (vs) -> concat [ tostring d for d in *vs ], '\n'
 				kind_commands = Commands {
-					maps: => list_kind @maps
+					maps: => list_kind @query_state.maps
 					zones: =>
-						return problem "Must specify a map" unless @map
-						list_kind @map.zones
+						return problem "Must specify a map" unless @query_state.map
+						list_kind @query_state.map.zones
 					abilities: => list_kind @abilities
 					usages: =>
-						return problem "Must specify an ability" unless @ability
-						list_kind @ability.usages
+						return problem "Must specify an ability" unless @query_state.ability
+						list_kind @query_state.ability.usages
 				}, {
 					maps: => 'List known maps'
 					zones: => 'List known zones of the current map'
@@ -244,16 +249,16 @@ class ProgState
 				sb!
 		progress: (...) =>
 			nargs = select '#', ...
-			return @progress\render @map, @zone, @ability, @usage unless 0 < nargs
+			return @progress\render @query_state unless 0 < nargs
 			update_command = (f) -> (...) ->
 				return problem "Must specify what to update (progress or target)" unless 1 <= nargs
 				return problem "Must specify an amount to update" unless 2 <= nargs
-				unless @map and @zone and @ability and @usage
+				unless @query_state\is_complete!
 					return problem "Must set a map, zone, ability and usage before updating a target!"
 				f ...
 			update_commands = Commands {
-				progress: (how_much) => (update_command -> @progress\set_progress @map, @zone, @ability, @usage, how_much)!
-				target: (how_much) => (update_command -> @progress\set_target @map, @zone, @ability, @usage, how_much)!
+				progress: (how_much) => (update_command -> @progress\set_progress @query_state, how_much)!
+				target: (how_much) => (update_command -> @progress\set_target @query_state, how_much)!
 			}, {
 				progress: => "Set progress to a specified amount or +/- to increment/decrement existing value"
 				target: => "Set target to a specified amount or +/- to increment/decrement existing value"

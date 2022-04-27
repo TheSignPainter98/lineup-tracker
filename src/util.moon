@@ -187,4 +187,28 @@ show = (v) ->
 		else
 			error 'Unknown type', type v
 
-{ :Coloured, :insert_sorted, :is_list, :named_get, :StringBuilder, :show, :sorted, :Table }
+eq = (a,b) ->
+	ta = type a
+	tb = type b
+	if ta != tb
+		return false
+
+	if ta != 'table' and tb != 'table'
+		return a == b
+
+	mt = getmetatable a
+	if mt and mt.__eq
+		return a == b
+
+	for k1,v1 in pairs a
+		v2 = b[k1]
+		if v2 == nil or not eq v1,v2
+			return false
+
+	for k2,v2 in pairs b
+		v1 = a[k2]
+		if v1 == nil or not eq v1,v2
+			return false
+	true
+
+{ :Coloured, :eq, :insert_sorted, :is_list, :named_get, :StringBuilder, :show, :sorted, :Table }

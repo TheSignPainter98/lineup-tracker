@@ -3,6 +3,19 @@
 At its heart, this program takes maps which may have zones and abilities which may have usages and stores a user’s progress towards a target.
 Commands are available to update progress and targets as well as to add new maps, zones, abilities and usages.
 
+## Contents
+
+<!-- vim-markdown-toc GFM -->
+
+* [How do I install this?](#how-do-i-install-this)
+* [How do I use this?](#how-do-i-use-this)
+    * [Abbreviations](#abbreviations)
+* [What’s the motivation?](#whats-the-motivation)
+* [Why does this exist?](#why-does-this-exist)
+* [Author and License](#author-and-license)
+
+<!-- vim-markdown-toc -->
+
 ## How do I install this?
 
 The following steps are required.

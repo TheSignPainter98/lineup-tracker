@@ -138,7 +138,7 @@ class Progress -- (map * zone) * (ability * usage) -> target
 						row_header = { '' }
 
 class Target
-	new: (@amt=0, @target=1) =>
+	new: (@amt=0, @target=2) =>
 	render: =>
 		local text
 		if @target == 0

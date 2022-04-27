@@ -2,6 +2,8 @@
 
 .DEFAULT: lineup-tracker
 
+BINDIR = /usr/bin
+
 MOONSCRIPT_SRCS = $(shell find src/ -name '*.moon')
 LUA_OBJS = $(subst .moon,.lua,$(MOONSCRIPT_SRCS))
 OBJS = $(subst .moon,.o,$(MOONSCRIPT_SRCS))
@@ -26,6 +28,10 @@ lineup-tracker: $(LUA_OBJS)
 .INTERMEDIATE: %.mod
 
 %.moon:
+
+install: lineup-tracker
+	install -Dm755 $< $(BINDIR)
+.PHONY: install
 
 clean:
 	rm -f src/*.o src/*.mod src/*.lua lineup-tracker

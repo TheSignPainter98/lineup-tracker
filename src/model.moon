@@ -97,8 +97,27 @@ class Progress -- (map * zone) * (ability * usage) -> target
 	__tostring: => @render!
 	render: (query_state) =>
 		tostring with Table!
+			global_target = Target!
+			for _,map in pairs @data
+				for _,zone in pairs map
+					for _,ability in pairs zone
+						for _,target in pairs ability
+							global_target += target
+			header_square = {
+				{
+					with Coloured 'Progress'
+						\fg 'blue'
+						\bold!
+					global_target\render!\bold!
+				}
+				{
+					''
+					(global_target\render 'percent')\bold!
+				}
+			}
+
 			-- Upper header
-			\add with { '', '' }
+			\add with header_square[1]
 				i = 3
 				for ability in *@abilities
 					cell = with Coloured ability.name
@@ -110,7 +129,7 @@ class Progress -- (map * zone) * (ability * usage) -> target
 						[i] = ''
 						i += 1
 			-- Lower header
-			\add with { '', '' }
+			\add with header_square[2]
 				i = 3
 				for ability in *@abilities
 					for usage in *ability.usages
@@ -141,14 +160,21 @@ class Progress -- (map * zone) * (ability * usage) -> target
 								i += 1
 						row_header = { '' }
 
+
 class Target
 	new: (@amt=0, @target=2) =>
-	render: =>
+	render: (fmt='raw') =>
 		local text
 		if @target == 0
 			text = "-"
 		else
-			text = "#{@amt}/#{@target}"
+			switch fmt
+				when 'raw'
+					text = "#{@amt}/#{@target}"
+				when 'percent'
+					text = "#{100 * @amt // @target}%"
+				else
+					error "Unknown formatting option for target: #{fmt}"
 		with Coloured text
 			if @target == 0
 				\fg 'blue'
@@ -159,6 +185,7 @@ class Target
 			else
 				\fg 'green'
 	__tostring: => "#{@amt}/#{@target}"
+	__add: (t) => Target (@amt + t.amt), (@target) + t.target
 	@load: (target) => Target target.amt, target.target
 	save: => {
 		amt: @amt

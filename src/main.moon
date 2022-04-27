@@ -83,7 +83,7 @@ class ProgState
 		else
 			while true
 				write @prompt!
-				resp = read! -- TODO add semicolon suppore!
+				resp = read!
 				unless resp
 					print!
 					return 0

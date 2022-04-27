@@ -60,7 +60,6 @@ class Progress -- (map * zone) * (ability * usage) -> target
 		insert_sorted @abilities, ability, (a) -> a.name\lower!
 		for map in *@maps
 			for zone in *map.zones
-				print map.name, zone.name, @data[map.name][zone.name]
 				@data[map.name][zone.name][ability.name] = {}
 	new_usage: (ability, usage) =>
 		ability ..= usage

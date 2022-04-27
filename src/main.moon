@@ -171,6 +171,11 @@ class ProgState
 				@usage = nil
 				return problem "Usage requies an ability"
 			@usage = named_get @ability.usages, usage
+		reset: =>
+			@map = nil
+			@zone = nil
+			@ability = nil
+			@usage = nil
 		state: => Table {
 				{ "Map", @map or 'none' }
 				{ "Zone", @zone or 'none' }
@@ -269,6 +274,7 @@ class ProgState
 		map: => "Set the current map to $1"
 		new: => "Add a new $1 called $2"
 		progress: => "Show progress"
+		reset: => "Reset the current query state"
 		Save: => "Save changes"
 		state: => "Print the current query state"
 		usage: => "Set the current usage in the current ability to $1"

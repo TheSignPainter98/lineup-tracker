@@ -94,6 +94,7 @@ class Progress -- (map * zone) * (ability * usage) -> target
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
 	__tostring: => @render!
 	render: (map, zone, ability, usage) =>
+		return unless 0 < #@abilities or 0 < #@maps
 		tostring with Table!
 			-- Upper header
 			\add with { '', '' }

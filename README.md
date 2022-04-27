@@ -40,7 +40,7 @@ It must be noted that this shell tracks a ‘query-state,’ which defines what 
 The current query state will appear in the shell’s prompt, and can also be checked by typing `state`.
 
 Type `exit`, `quit` or EOF (Ctrl+D on Linux) to exit.
-The program always saves before exiting, but this can be invoked earlier by using the `Save` command.
+The program saves before exiting, but this can be invoked earlier by using the `Save` command.
 
 Type `help` for more info on which commands are available.
 More generally, any command or sub-command with `help` as its first argument will output a help message.

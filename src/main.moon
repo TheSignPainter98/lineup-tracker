@@ -11,7 +11,7 @@ import Coloured, insert_sorted, named_get, sorted, StringBuilder, Table from req
 import statuses, problem from require 'status'
 import concat, insert, unpack from table
 
-DEFAULT_SAVE_FILE = '.progress.yml'
+DEFAULT_SAVE_FILE = '~/.lineup-progress.yml'
 
 import PASS, FAIL, EXIT from statuses
 

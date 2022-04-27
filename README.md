@@ -3,6 +3,8 @@
 At its heart, this program takes maps which may have zones and abilities which may have usages and stores a user’s progress towards a target.
 Commands are available to update progress and targets as well as to add new maps, zones, abilities and usages.
 
+![Example progress](https://raw.githubusercontent.com/TheSignPainter98/lineup-tracker/master/img/example.png)
+
 ## Contents
 
 <!-- vim-markdown-toc GFM -->

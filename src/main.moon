@@ -16,7 +16,10 @@ DEFAULT_SAVE_FILE = '.progress.yml'
 import PASS, FAIL, EXIT from statuses
 
 class Commands
-	new: (@cmds) =>
+	new: (@cmds, @help={}) =>
+		unless @cmds.help
+			@cmds.help = -> @show_help @
+			@help.help = => "Show help"
 	__call: (...) => @execute ...
 	__pairs: => next, @cmds
 	execute: (prog_state, cmd, ...) =>
@@ -47,6 +50,10 @@ class Commands
 			else
 				stderr\write "Ambiguous command '#{cmd}' can match any of: #{concat matching_keys, ', '}"
 	cmd_keys: => [ k for k in pairs @cmds ]
+	show_help: =>
+		for cmd in pairs @cmds
+			stderr\write "no help for #{cmd}\n" unless @help[cmd]
+		Table sorted [ { cmd, @help[cmd] and (@help[cmd] @) or '' } for cmd in pairs @cmds ], (a,b) -> a[1] < b[1]
 
 
 class ProgState
@@ -164,10 +171,6 @@ class ProgState
 				@usage = nil
 				return problem "Usage requies an ability"
 			@usage = named_get @ability.usages, usage
-		help: =>
-			for cmd in pairs @cmds
-				stderr\write "no help for #{cmd}\n" unless @help[cmd]
-			Table sorted [ { cmd, @help[cmd] and (@help[cmd] @) or '' } for cmd in pairs @cmds ], (a,b) -> a[1] < b[1]
 		state: => Table {
 				{ "Map", @map or 'none' }
 				{ "Zone", @zone or 'none' }
@@ -197,16 +200,30 @@ class ProgState
 					problem "Cannot set usage without first setting an ability!" unless @ability
 					@usage = Usage name
 					@progress\new_usage @ability, @usage
+			}, {
+				map: => 'Create a new map'
+				zone: => 'Create a new zone in the current map'
+				ability: => 'Create a new ability'
+				usage: => 'Create a new usage'
 			}
 			cmds @, ...
 		list: (kind) =>
 			if kind
-				list_kind = (k) => concat [ tostring d for d in *@[k] ], '\n'
+				list_kind = (vs) -> concat [ tostring d for d in *vs ], '\n'
 				kind_commands = Commands {
-					maps: => list_kind @, 'maps'
-					zones: => list_kind @, 'zones'
-					abilities: => list_kind @, 'abilities'
-					usages: => list_kind @, 'usages'
+					maps: => list_kind @maps
+					zones: =>
+						return problem "Must specify a map" unless @map
+						list_kind @map.zones
+					abilities: => list_kind @abilities
+					usages: =>
+						return problem "Must specify an ability" unless @ability
+						list_kind @ability.usages
+				}, {
+					maps: => 'List known maps'
+					zones: => 'List known zones of the current map'
+					abilities: => 'List known abilities'
+					usages: => 'List known usages of the current ability'
 				}
 				kind_commands @, kind
 			else
@@ -232,10 +249,12 @@ class ProgState
 			update_commands = Commands {
 				progress: (how_much) => @progress\set_progress @map, @zone, @ability, @usage, how_much
 				target: (how_much) => @progress\set_target @map, @zone, @ability, @usage, how_much
+			}, {
+				progress: => "Set progress to a specified amount or +/- to increment/decrement existing value"
+				target: => "Set target to a specified amount or +/- to increment/decrement existing value"
 			}
 			update_commands @, ...
-	}
-	help:
+	}, {
 		ability: => "Set the current ability to $1"
 		exit: => "Exit the program"
 		quit: => @help.exit @

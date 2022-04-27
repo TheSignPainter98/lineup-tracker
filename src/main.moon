@@ -1,13 +1,15 @@
 import read, open, stderr, write from io
 import max from math
-import exit from os
+import exit, getenv from os
 import dump, load from require 'lyaml'
 import Ability, Map, Progress, Usage, Zone from require 'model'
 import Coloured, insert_sorted, named_get, sorted, StringBuilder, Table from require 'util'
 import statuses, problem from require 'status'
 import concat, insert, unpack from table
 
-DEFAULT_SAVE_FILE = '~/.lineup-progress.yml'
+HOME = (getenv 'HOME') or (getenv 'HOMEPATH') or (getenv 'HOMEDRIVE')
+error "Cannot find home directory" unless HOME
+DEFAULT_SAVE_FILE = "#{HOME}/.lineup-progress.yml"
 
 import PASS, FAIL, EXIT from statuses
 

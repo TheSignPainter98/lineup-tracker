@@ -207,7 +207,7 @@ class ProgState
 					@progress\new_ability @query_state.ability
 				usage: (name) =>
 					return problem "New ability needs a name" unless name
-					problem "Cannot set usage without first setting an ability!" unless @query_state.ability
+					return problem "Cannot set usage without first setting an ability!" unless @query_state.ability
 					@query_state.usage = Usage name
 					@progress\new_usage @query_state.ability, @query_state.usage
 			}, {

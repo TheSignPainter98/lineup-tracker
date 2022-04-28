@@ -1,5 +1,6 @@
 local *
 
+import max from math
 import problem, statuses from require 'status'
 import eq, Coloured, insert_sorted, StringBuilder, Table from require "util"
 import insert, unpack from table
@@ -72,12 +73,12 @@ class Progress -- (map * zone) * (ability * usage) -> target
 		with @_at map, zone, ability, usage
 			switch progress
 				when '+'
-					.amt += 1
+					\mut_amt 1
 				when '-'
-					.amt -= 1
+					\mut_amt -1
 				else
 					return problem "Progress amount must be a number: could not parse '#{progress}'" unless n
-					.amt = n
+					\set_amt n
 		PASS
 	set_target: (query_state, target) =>
 		import map, zone, ability, usage from query_state
@@ -186,6 +187,10 @@ class Target
 				\fg 'yellow'
 			else
 				\fg 'green'
+	set_amt: (@amt) =>
+	set_target: (target) => @target = max 0, target
+	mut_amt: (delta) => @amt += delta
+	mut_target: (delta) => @target = max 0, @target + delta
 	__tostring: => "#{@amt}/#{@target}"
 	__add: (t) => Target (@amt + t.amt), (@target) + t.target
 	@load: (target) => Target target.amt, target.target

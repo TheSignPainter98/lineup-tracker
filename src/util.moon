@@ -1,6 +1,7 @@
 local *
 
 import max from math
+import problem from require 'status'
 import rep from string
 import concat, insert, sort, unpack from table
 
@@ -167,7 +168,8 @@ named_get = (list, id) ->
 	return list[tonumber id] if ('string' != type id) or id\match '^%d+$'
 	for elem in *list
 		if elem.name == id
-			return elem
+			return elem, nil
+	nil, problem "Unknown ID: #{id}"
 
 is_list = (l) ->
 	type = type

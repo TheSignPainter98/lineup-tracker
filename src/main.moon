@@ -184,25 +184,51 @@ class ProgState
 		@cmds cmd, ...
 	cmds: Commands {
 		map: (map) =>
-			return problem "Specify map!" unless map
-			@query_state.map = named_get @maps, map
-			@query_state.zone = nil
+			local err
+			with @query_state
+				.zone = nil
+				if map
+					tmap, err = named_get @maps, map
+					.map = tmap unless err
+				else
+					.map = nil
+			err
 		zone: (zone) =>
-			unless @query_state.map
-				@query_state.zone = nil
-				return problem "Zone requires a map"
-			return problem "Specify zone!" unless zone
-			@query_state.zone = named_get @query_state.map.zones, zone
+			local err
+			with @query_state
+				unless .map
+					.zone = nil
+					err = problem "Zone requires a map"
+					return
+				if zone
+					tzone, err = named_get .map.zones, zone
+					.zone = tzone unless err
+				else
+					.zone = nil
+			err
 		ability: (ability) =>
-			return problem "Specify ability" unless ability
-			@query_state.ability = named_get @abilities, ability
-			@query_state.usage = nil
+			local err
+			with @query_state
+				.usage = nil
+				if ability
+					tability, err = named_get @abilities, ability
+					.ability = tability unless err
+				else
+					.ability = nil
+			err
 		usage: (usage) =>
-			return problem "Specify usage!" unless usage
-			unless @query_state.ability
-				@query_state.usage = nil
-				return problem "Usage requies an ability"
-			@query_state.usage = named_get @query_state.ability.usages, usage
+			local err
+			with @query_state
+				unless .ability
+					.usage = nil
+					err = problem "Usage requies an ability"
+					return
+				if usage
+					tusage, err = named_get .ability.usages, usage
+					.usage = tusage unless err
+				else
+					.usage = nil
+			err
 		reset: => @query_state\reset!
 		state: => Table {
 				{ "Map", @query_state.map or 'none' }

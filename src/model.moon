@@ -194,7 +194,7 @@ class Target
 	mut_amt: (delta) => @amt += delta
 	mut_target: (delta) => @target = max 0, @target + delta
 	__tostring: => "#{@amt}/#{@target}"
-	__add: (t) => Target (@amt + t.amt), (@target) + t.target
+	__add: (t) => Target ((max 0, @amt) + (max 0, t.amt)), (@target) + t.target
 	@load: (target) => Target target.amt, target.target
 	save: => {
 		amt: @amt

@@ -16,7 +16,7 @@ import PASS, FAIL, EXIT from statuses
 class Commands
 	new: (@cmds, @help={}) =>
 		unless @cmds.help
-			@cmds.help = -> @show_help @
+			@cmds.help = (ps) -> @show_help ps
 			@help.help = => "Show help"
 	__call: (...) => @execute ...
 	__pairs: => next, @cmds
@@ -48,9 +48,10 @@ class Commands
 			else
 				problem "Ambiguous command '#{cmd}' can match any of: #{concat matching_keys, ', '}"
 	cmd_keys: => [ k for k in pairs @cmds ]
-	show_help: =>
+	show_help: (prog_state) =>
 		for cmd in pairs @cmds
 			stderr\write "no help for #{cmd}\n" unless @help[cmd]
+		prog_state.no_render_at_prompt = true
 		Table sorted [ { cmd, @help[cmd] and (@help[cmd] @) or '' } for cmd in pairs @cmds ], (a,b) -> a[1] < b[1]
 
 class QueryState

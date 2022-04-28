@@ -1,4 +1,4 @@
-import read, open, stderr, write from io
+import read, open, stderr, stdout, write from io
 import max from math
 import exit, getenv from os
 import dump, load from require 'lyaml'
@@ -117,6 +117,7 @@ class ProgState
 			while true
 				unless (is_bad @prev_rc) or @no_render_at_prompt
 					if pr = @progress\render @query_state
+						stdout\write '\x1b[H\x1b[2J'
 						print pr
 				@no_render_at_prompt = false
 				write @prompt!
@@ -303,6 +304,7 @@ class ProgState
 			nargs = select '#', ...
 			unless 0 < nargs
 				@no_render_at_prompt = true
+				stdout\write '\x1b[H\x1b[2J'
 				return @progress\render @query_state, false
 			update_command = (f) -> (...) ->
 				return problem "Must specify what to update (progress or target)" unless 1 <= nargs

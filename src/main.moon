@@ -274,12 +274,10 @@ class ProgState
 				sb!
 		progress: (...) =>
 			nargs = select '#', ...
-			return @progress\render @query_state unless 0 < nargs
+			return @progress\render @query_state, false unless 0 < nargs
 			update_command = (f) -> (...) ->
 				return problem "Must specify what to update (progress or target)" unless 1 <= nargs
 				return problem "Must specify an amount to update" unless 2 <= nargs
-				unless @query_state\is_complete!
-					return problem "Must set a map, zone, ability and usage before updating a target!"
 				f ...
 			update_commands = Commands {
 				progress: (how_much) => (update_command -> @progress\set_progress @query_state, how_much)!

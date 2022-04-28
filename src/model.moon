@@ -67,36 +67,46 @@ class Progress -- (map * zone) * (ability * usage) -> target
 		for map in *@maps
 			for zone in *map.zones
 				@data[map.name][zone.name][ability.name][usage.name] = Target!
-	set_progress: (query_state, progress) =>
-		import map, zone, ability, usage from query_state
-		n = tonumber progress
-		with @_at map, zone, ability, usage
-			switch progress
-				when '+'
-					\mut_amt 1
-				when '-'
-					\mut_amt -1
-				else
-					return problem "Progress amount must be a number: could not parse '#{progress}'" unless n
-					\set_amt n
+	set_progress: (query_state, amt) =>
+		for target in *@_select query_state
+			with target
+				switch amt
+					when '+'
+						\mut_amt 1
+					when '-'
+						\mut_amt -1
+					else
+						n = tonumber amt
+						return problem "Progress amount must be a number: could not parse '#{amt}'" unless n
+						\set_amt n
 		PASS
-	set_target: (query_state, target) =>
-		import map, zone, ability, usage from query_state
-		target = target\lower!
-		n = tonumber target
-		with @_at map, zone, ability, usage
-			switch target
-				when '+'
-					\mut_target 1
-				when '-'
-					\mut_target -1
-				else
-					return problem "Target amount must be a number: could not parse '#{target}'" unless n
-					\set_target n
+	set_target: (query_state, amt) =>
+		for target in *@_select query_state
+			with target
+				switch amt
+					when '+'
+						\mut_target 1
+					when '-'
+						\mut_target -1
+					else
+						n = tonumber amt
+						return problem "Target amount must be a number: could not parse '#{amt}'" unless n
+						{ map: MAP, zone: ZONE, ability: ABILITY, usage: USAGE } = query_state
+						\set_target n
 		PASS
+	_select: (query_state) =>
+		import map, zone, ability, usage from query_state
+		with {}
+			i = 1
+			for m in *(map and {map} or @maps)
+				for z in *(zone and {zone} or m.zones)
+					for a in *(ability and {ability} or @abilities)
+						for u in *(usage and {usage} or a.usages)
+							[i] = @_at m, z, a, u
+							i += 1
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
 	__tostring: => @render!
-	render: (query_state) =>
+	render: (query_state, show_selection=true) =>
 		global_target = Target 0, 0
 		do_output = false
 		for _,map in pairs @data
@@ -144,22 +154,29 @@ class Progress -- (map * zone) * (ability * usage) -> target
 						[i] = cell
 						i += 1
 
+			-- Import selection data
+			{ map: MAP, zone: ZONE, ability: ABILITY, usage: USAGE } = query_state
+
 			-- Table body
 			for map in *@maps
+				map_match = not MAP or map == MAP
 				row_header = {}
 				row_header[1] = with Coloured map.name
 					\bold!
 					\hifg!
 				for zone in *map.zones
+					zone_match = not ZONE or zone == ZONE
 					row_header[2] = with Coloured zone.name
 						\bold!
 						\hifg!
 					\add with { unpack row_header }
 						i = 3
 						for ability in *@abilities
+							ability_match = not ABILITY or ability == ABILITY
 							for usage in *ability.usages
+								usage_match = not USAGE or usage == USAGE
 								[i] = (@_at map, zone, ability, usage)\render!
-								if eq query_state, { :map, :zone, :ability, :usage }
+								if show_selection and map_match and zone_match and ability_match and usage_match -- eq query_state, { :map, :zone, :ability, :usage }
 									[i]\bg 'white'
 									[i]\fg 'black'
 									[i]\bold!

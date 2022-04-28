@@ -96,13 +96,15 @@ class Progress -- (map * zone) * (ability * usage) -> target
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
 	__tostring: => @render!
 	render: (query_state) =>
+		global_target = Target 0, 0
+		for _,map in pairs @data
+			for _,zone in pairs map
+				for _,ability in pairs zone
+					for _,target in pairs ability
+						global_target += target
+		return unless 0 < global_target.target
+
 		tostring with Table!
-			global_target = Target!
-			for _,map in pairs @data
-				for _,zone in pairs map
-					for _,ability in pairs zone
-						for _,target in pairs ability
-							global_target += target
 			header_square = {
 				{
 					with Coloured 'Progress'

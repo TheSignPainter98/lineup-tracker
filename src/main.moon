@@ -83,6 +83,7 @@ class ProgState
 		@abilities = {}
 		@query_state = QueryState @maps, @abilities
 		@progress = Progress @maps, @abilities
+		@no_render_at_prompt = false
 	save: (file=DEFAULT_SAVE_FILE) =>
 		with open file, 'w+'
 			\write dump {{
@@ -113,9 +114,10 @@ class ProgState
 						0
 		else
 			while true
-				unless is_bad @prev_rc
+				unless (is_bad @prev_rc) or @no_render_at_prompt
 					if pr = @progress\render @query_state
 						print pr
+				@no_render_at_prompt = false
 				write @prompt!
 				resp = read!
 				unless resp
@@ -300,7 +302,9 @@ class ProgState
 				sb!
 		progress: (...) =>
 			nargs = select '#', ...
-			return @progress\render @query_state, false unless 0 < nargs
+			unless 0 < nargs
+				@no_render_at_prompt = true
+				return @progress\render @query_state, false
 			update_command = (f) -> (...) ->
 				return problem "Must specify what to update (progress or target)" unless 1 <= nargs
 				return problem "Must specify an amount to update" unless 2 <= nargs

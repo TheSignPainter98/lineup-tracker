@@ -160,9 +160,8 @@ class Progress -- (map * zone) * (ability * usage) -> target
 							for usage in *ability.usages
 								[i] = (@_at map, zone, ability, usage)\render!
 								if eq query_state, { :map, :zone, :ability, :usage }
-									[i]\bg 'purple'
-									[i]\hibg!
-									[i]\fg 'white'
+									[i]\bg 'white'
+									[i]\fg 'black'
 									[i]\bold!
 								i += 1
 						row_header = { '' }

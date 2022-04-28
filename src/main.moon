@@ -96,6 +96,8 @@ class ProgState
 						0
 		else
 			while true
+				if pr = @progress\render @query_state
+					print pr
 				write @prompt!
 				resp = read!
 				unless resp

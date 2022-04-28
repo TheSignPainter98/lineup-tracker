@@ -4,7 +4,7 @@ import exit, getenv from os
 import dump, load from require 'lyaml'
 import Ability, Map, Progress, Usage, Zone from require 'model'
 import Coloured, insert_sorted, named_get, sorted, StringBuilder, Table from require 'util'
-import statuses, problem from require 'status'
+import is_bad, statuses, problem from require 'status'
 import concat, insert, unpack from table
 
 HOME = (getenv 'HOME') or (getenv 'HOMEPATH') or (getenv 'HOMEDRIVE')
@@ -23,6 +23,7 @@ class Commands
 	execute: (prog_state, cmd, ...) =>
 		return problem "Missing command" unless cmd
 		if f = @get_cmd cmd
+			return f if is_bad f
 			ret = (f prog_state, ...)
 			switch type ret
 				when 'nil', 'integer', 'number'
@@ -41,12 +42,11 @@ class Commands
 				insert matching_keys, cmd_key
 		switch #matching_keys
 			when 0
-				stderr\write "Unknown command '#{cmd}'\n"
-				nil
+				problem "Unknown command '#{cmd}'"
 			when 1
 				@cmds[matching_keys[1]]
 			else
-				stderr\write "Ambiguous command '#{cmd}' can match any of: #{concat matching_keys, ', '}"
+				problem "Ambiguous command '#{cmd}' can match any of: #{concat matching_keys, ', '}"
 	cmd_keys: => [ k for k in pairs @cmds ]
 	show_help: =>
 		for cmd in pairs @cmds
@@ -113,15 +113,17 @@ class ProgState
 						0
 		else
 			while true
-				if pr = @progress\render @query_state
-					print pr
+				unless is_bad @prev_rc
+					if pr = @progress\render @query_state
+						print pr
 				write @prompt!
 				resp = read!
 				unless resp
 					print!
 					return 0
 				for cmd in resp\gmatch '%s*([^;]*);*'
-					switch @execute unpack [ w for w in cmd\gmatch '%s*([^%s]+)' ]
+					@prev_rc = @execute unpack [ w for w in cmd\gmatch '%s*([^%s]+)' ]
+					switch @prev_rc
 						when FAIL
 							return 1
 						when EXIT
@@ -158,6 +160,10 @@ class ProgState
 		if @query_state.usage
 			insert prompt_data, with Coloured " #{@query_state.usage} "
 				\bg 'purple'
+		if is_bad @prev_rc
+			insert prompt_data, with Coloured " ! "
+				\bg 'red'
+				\bold!
 		prompt_parts = {}
 		n = #prompt_data
 		for i = 1, n

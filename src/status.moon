@@ -1,14 +1,17 @@
 import stderr from io
 
 statuses = {
+	WARN: 2
 	FAIL: 1
 	EXIT: -1
 	PASS: 0
 }
 
-import FAIL, PASS from statuses
+import FAIL, WARN from statuses
 problem = (msg, fatal=false) ->
 	stderr\write msg .. '\n'
-	fatal and FAIL or PASS
+	fatal and FAIL or WARN
 
-{ :statuses, :problem }
+is_bad = (c) -> c == WARN or c == FAIL
+
+{ :is_bad, :statuses, :problem }

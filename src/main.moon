@@ -54,19 +54,34 @@ class Commands
 		Table sorted [ { cmd, @help[cmd] and (@help[cmd] @) or '' } for cmd in pairs @cmds ], (a,b) -> a[1] < b[1]
 
 class QueryState
-	new: () => @reset!
+	new: (@maps, @abilities) => @reset!
 	reset: =>
-		@map = nil
-		@zone = nil
-		@ability = nil
-		@usage = nil
+		@map = named_get @maps, 1
+		@zone = @map and named_get @map.zones, 1
+		@ability = named_get @abilities, 1
+		@usage = @ability and named_get @ability.usages, 1
 	is_complete: => @map and @zone and @ability and @usage
+	@load: (maps, abilities, state) =>
+		with QueryState maps, abilities
+			if state
+				.map = named_get .maps, state.map
+				.zone = .map and named_get .map.zones, state.zone
+				.ability = named_get .abilities, state.ability
+				.usage = .ability and named_get .ability.usages, state.usage
+	save: => {
+			map: @map and @map.name
+			zone: @zone and @zone.name
+			ability: @ability and @ability.name
+			usage: @usage and @usage.name
+		}
+	__eq: (s) => @map == s.map and @zone == s.zone and @ability == s.ability and @usage == s.usage
+
 
 class ProgState
 	new: =>
-		@query_state = QueryState!
 		@maps = {}
 		@abilities = {}
+		@query_state = QueryState @maps, @abilities
 		@progress = Progress @maps, @abilities
 	save: (file=DEFAULT_SAVE_FILE) =>
 		with open file, 'w+'
@@ -74,6 +89,7 @@ class ProgState
 				maps: [ m\save! for m in *@maps ]
 				abilities: [ a\save! for a in *@abilities ]
 				progress: @progress\save!
+				query_state: @query_state\save!
 			}}
 			\close!
 	load: (file=DEFAULT_SAVE_FILE) =>
@@ -86,6 +102,7 @@ class ProgState
 			@maps = [ Map\load m for m in *data.maps or {} ]
 			@abilities = [ Ability\load a for a in *data.abilities or {} ]
 			@progress = Progress\load @maps, @abilities, data.progress
+			@query_state = QueryState\load @maps, @abilities, data.query_state
 	loop: (args) =>
 		if #args != 0
 			for cmd in *@arg_cmds args

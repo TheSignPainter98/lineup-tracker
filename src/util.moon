@@ -164,7 +164,7 @@ insert_sorted = (list, thing, key=(v)->v) ->
 	insert list, insertion_point, thing
 
 named_get = (list, id) ->
-	return list[tonumber id] if id\match '^%d+$'
+	return list[tonumber id] if ('string' != type id) or id\match '^%d+$'
 	for elem in *list
 		if elem.name == id
 			return elem

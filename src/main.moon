@@ -200,8 +200,7 @@ class ProgState
 			with @query_state
 				unless .map
 					.zone = nil
-					err = problem "Zone requires a map"
-					return
+					return problem "Zone requires a map"
 				if zone
 					tzone, err = named_get .map.zones, zone
 					.zone = tzone unless err
@@ -223,8 +222,7 @@ class ProgState
 			with @query_state
 				unless .ability
 					.usage = nil
-					err = problem "Usage requies an ability"
-					return
+					return problem "Usage requires an ability"
 				if usage
 					tusage, err = named_get .ability.usages, usage
 					.usage = tusage unless err

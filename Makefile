@@ -10,8 +10,8 @@ OBJS = $(subst .moon,.o,$(MOONSCRIPT_SRCS))
 
 lineup-tracker: $(LUA_OBJS)
 	echo "#!/usr/bin/lua" > $@
-	luac -o - $(subst .moon,.lua,$(shell ./po-lin $(subst .lua,.moon,$^))) >> $@
-	chmod 700 $@
+	luac -o - $(subst .moon,.lua,$(shell ./po-lin $(subst .lua,.moon,$^))) >> $@; \
+		[[ -f $@ ]] && chmod 700 $@ # luac seems to be memory-unsafe for multiple input files, but still outputs most of the time...
 # .DELETE_ON_ERROR: lineup-tracker
 
 %.luac: %.lua

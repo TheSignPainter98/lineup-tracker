@@ -75,6 +75,8 @@ class Progress -- (map * zone) * (ability * usage) -> target
 						\mut_amt 1
 					when '-'
 						\mut_amt -1
+					when 'm'
+						\set_amt .target
 					else
 						n = tonumber amt
 						return problem "Progress amount must be a number: could not parse '#{amt}'" unless n
@@ -88,6 +90,8 @@ class Progress -- (map * zone) * (ability * usage) -> target
 						\mut_target 1
 					when '-'
 						\mut_target -1
+					when 'm'
+						\set_target .amt
 					else
 						n = tonumber amt
 						return problem "Target amount must be a number: could not parse '#{amt}'" unless n

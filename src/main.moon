@@ -322,6 +322,10 @@ class ProgState
 		'-': => @execute 'progress', 'progress', '-'
 		'>': => @execute 'progress', 'target', '+'
 		'<': => @execute 'progress', 'target', '-'
+		'++': => @execute 'progress', 'progress', 'm'
+		'--': => @execute 'progress', 'progress', '0'
+		'>>': => @execute 'progress', 'target', 'm'
+		'<<': => @execute 'progress', 'target', '0'
 	}, {
 		ability: => "Set the current ability to $1"
 		exit: => "Exit the program"
@@ -340,6 +344,10 @@ class ProgState
 		'-': => "Alias, executes 'progress progress -'"
 		'>': => "Alias, executes 'progress target +'"
 		'<': => "Alias, executes 'progress target -'"
+		'++': => "Alias, executes 'progress progress m'"
+		'--': => "Alias, executes 'progress progress 0'"
+		'>>': => "Alias, executes 'progress target m'"
+		'<<': => "Alias, executes 'progress target 0'"
 	}
 
 main = (...) ->

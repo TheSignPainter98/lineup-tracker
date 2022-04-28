@@ -87,23 +87,25 @@ class Progress -- (map * zone) * (ability * usage) -> target
 		with @_at map, zone, ability, usage
 			switch target
 				when '+'
-					.target += 1
+					\mut_target 1
 				when '-'
-					.target -= 1
+					\mut_target -1
 				else
 					return problem "Target amount must be a number: could not parse '#{target}'" unless n
-					.target = n
+					\set_target n
 		PASS
 	_at: (map, zone, ability, usage) => @data[map.name][zone.name][ability.name][usage.name]
 	__tostring: => @render!
 	render: (query_state) =>
 		global_target = Target 0, 0
+		do_output = false
 		for _,map in pairs @data
 			for _,zone in pairs map
 				for _,ability in pairs zone
 					for _,target in pairs ability
 						global_target += target
-		return unless 0 < global_target.target
+						do_output = true
+		return unless do_output
 
 		tostring with Table!
 			header_square = {

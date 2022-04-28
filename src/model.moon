@@ -1,6 +1,6 @@
 local *
 
-import max from math
+import abs, max from math
 import problem, statuses from require 'status'
 import eq, Coloured, insert_sorted, StringBuilder, Table from require "util"
 import insert, unpack from table
@@ -183,7 +183,7 @@ class Target
 		with Coloured text
 			if @target == 0
 				\fg 'blue'
-			else if @amt <= @target / 4
+			else if (abs @amt) <= @target / 4
 				\fg 'red'
 			else if @amt < @target
 				\fg 'yellow'

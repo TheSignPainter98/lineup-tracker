@@ -239,7 +239,7 @@ class ProgState
 				{ "Usage", @query_state.usage or 'none' }
 			}
 		exit: => EXIT
-		quit: => @cmds @, 'exit'
+		quit: => @execute 'exit'
 		Save: => nil, @save!
 		new: (...) =>
 			cmds = Commands {

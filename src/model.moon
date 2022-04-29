@@ -95,7 +95,6 @@ class Progress -- (map * zone) * (ability * usage) -> target
 					else
 						n = tonumber amt
 						return problem "Target amount must be a number: could not parse '#{amt}'" unless n
-						{ map: MAP, zone: ZONE, ability: ABILITY, usage: USAGE } = query_state
 						\set_target n
 		PASS
 	_select: (query_state) =>

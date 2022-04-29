@@ -55,7 +55,11 @@ class Commands
 		Table sorted [ { cmd, @help[cmd] and (@help[cmd] @) or '' } for cmd in pairs @cmds ], (a,b) -> a[1] < b[1]
 
 class QueryState
-	new: (@maps, @abilities) => @reset!
+	new: (@maps, @abilities) =>
+		@map = nil
+		@zone = nil
+		@ability = nil
+		@usage = nil
 	reset: =>
 		@map = named_get @maps, 1
 		@zone = @map and named_get @map.zones, 1

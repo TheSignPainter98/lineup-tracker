@@ -4,7 +4,9 @@
 
 BINDIR = /usr/bin
 
-MOONSCRIPT_SRCS = $(shell find src/ -name '*.moon')
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
+MOONSCRIPT_SRCS = $(call rwildcard,src/,*.moon)
 LUA_OBJS = $(subst .moon,.lua,$(MOONSCRIPT_SRCS))
 OBJS = $(subst .moon,.o,$(MOONSCRIPT_SRCS))
 

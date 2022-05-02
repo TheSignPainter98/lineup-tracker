@@ -26,7 +26,7 @@ lineup-tracker: $(LUA_OBJS)
 .INTERMEDIATE: %.lua
 
 %.mod: %.moon ./moon-to-mod
-	./moon-to-mod -v module_name=$$(echo $< | sed 's|^src/||g' | sed 's|/|.|g' | sed 's/\.moon$$//') < $< > $@
+	./moon-to-mod -v module_name=$$(echo $< | sed 's|/|.|g' | sed 's/\.moon$$//') < $< > $@
 .INTERMEDIATE: %.mod
 
 %.moon:

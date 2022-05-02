@@ -1,7 +1,7 @@
 local *
 
 import max from math
-import problem from require 'status'
+import problem from require 'src.prog-stat'
 import rep from string
 import concat, insert, sort, unpack from table
 

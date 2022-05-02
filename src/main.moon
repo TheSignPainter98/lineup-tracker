@@ -2,9 +2,9 @@ import read, open, stderr, stdout, write from io
 import max from math
 import exit, getenv from os
 import dump, load from require 'lyaml'
-import Ability, Map, Progress, Usage, Zone from require 'model'
-import Coloured, insert_sorted, named_get, sorted, StringBuilder, Table from require 'util'
-import is_bad, statuses, problem from require 'status'
+import Ability, Map, Progress, Usage, Zone from require 'src.model'
+import Coloured, insert_sorted, named_get, sorted, StringBuilder, Table from require 'src.util'
+import is_bad, statuses, problem from require 'src.prog-stat'
 import concat, insert, unpack from table
 
 HOME = (getenv 'HOME') or (getenv 'HOMEPATH') or (getenv 'HOMEDRIVE')

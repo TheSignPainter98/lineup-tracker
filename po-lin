@@ -69,7 +69,7 @@ get_deps = (fname) ->
 
 	dep_lines = [ l for l in lines fname when l\match "require ['\"].*['\"]$" ]
 	dep_modules = [ l\match "['\"](.*)['\"]" for l in *dep_lines ]
-	raw_dep_files = [ 'src/' .. (m\gsub "%.", "/") .. '.moon' for m in *dep_modules ]
+	raw_dep_files = [ (m\gsub "%.", "/") .. '.moon' for m in *dep_modules ]
 	existant_dep_files = [ f for f in *raw_dep_files when file_exists f ]
 	existant_dep_files
 

@@ -1,8 +1,8 @@
 local *
 
 import abs, max from math
-import problem, statuses from require 'status'
-import eq, Coloured, insert_sorted, StringBuilder, Table from require "util"
+import problem, statuses from require 'src.prog-stat'
+import eq, Coloured, insert_sorted, StringBuilder, Table from require "src.util"
 import insert, unpack from table
 
 import PASS from statuses

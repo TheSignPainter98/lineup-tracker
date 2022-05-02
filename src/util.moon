@@ -47,20 +47,22 @@ class Set
 	new: (data) => @data = { d, true for d in *data }
 	__index: (k) => @data[k] != nil
 
-MARGIN = 4
 class Table
 	new: (@data={}) =>
 		@_hrules = {}
 		@_vrules = {}
 		@_halign = {}
 		@_valign = {}
+		@_margin = 4
 	hrules: (hrules) => @_hrules = Set hrules
 	vrules: (vrules) => @_vrules = Set vrules
 	halign: (halign) =>
 		halign = { halign\sub i, i for i=1,#halign} if 'string' == type halign
 		@_halign = halign
 	valign: (valign) =>
-		@_halign = valign
+		halign = { halign\sub i, i for i=1,#halign} if 'string' == type halign
+		@_valign = valign
+	margin: (@_margin) =>
 	_set_alignment: (direc, val) =>
 		val = { val\sub i, i for i=1,#val} if 'string' == type val
 		@['_' .. direc] = val
@@ -86,14 +88,17 @@ class Table
 
 		sb = StringBuilder!
 		nrows = #strtab
+		ncols = #strtab[1]
 		for rownum, row in ipairs @data
 			for col,cell in ipairs row
+				margin_width = col == ncols and 0 or @_margin
 				switch type cell
 					when 'table'
-						sb ..= cell\render MARGIN + col_lens[col]
+						sb ..= cell\render margin_width + col_lens[col]
 					else
-						sb ..= tostring cell
-						sb ..= ' '\rep MARGIN + col_lens[col] - #cell
+						scell = tostring cell
+						sb ..= scell
+						sb ..= ' '\rep margin_width + col_lens[col] - #scell
 			sb ..= '\n' if rownum != nrows
 		sb!
 

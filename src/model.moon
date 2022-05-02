@@ -8,7 +8,7 @@ import insert, unpack from table
 import PASS from statuses
 
 class Map
-	new: (@name, @zones={}) =>
+	new: (@name='de_dust2', @zones={}) =>
 	__concat: (zone) =>
 		insert @zones, zone
 		@
@@ -20,13 +20,13 @@ class Map
 	}
 
 class Zone
-	new: (@name) =>
+	new: (@name='b') =>
 	__tostring: => @name
 	@load: (zone) => Zone zone
 	save: => @name
 
 class Ability
-	new: (@name, @usages={}) =>
+	new: (@name='smoke', @usages={}) =>
 	__concat: (usage) =>
 		insert @usages, usage
 		@
@@ -38,7 +38,7 @@ class Ability
 	}
 
 class Usage
-	new: (@name) =>
+	new: (@name='site-take') =>
 	__tostring: => @name
 	@load: (usage) => Usage usage
 	save: => @name

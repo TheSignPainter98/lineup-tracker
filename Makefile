@@ -7,9 +7,9 @@ BINDIR = /usr/bin
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 MOONSCRIPT_SRCS = $(filter-out %_spec.moon,$(call rwildcard,src,*.moon))
-MOONSCRIPT_CHECK_SRCS = $(call rwildcard,src,*.moon)
+MOONSCRIPT_CHECK_SRCS = $(filter %_spec.moon,$(call rwildcard,src,*.moon))
 LUA_OBJS = $(subst .moon,.lua,$(MOONSCRIPT_SRCS))
-LUA_CHECK_OBJS = $(subst .moon,.lua,$(MOONSCRIPT_CHECK_SRCS))
+CHECK_SRCS = $(MOONSCRIPT_CHECK_SRCS) $(LUA_OBJS)
 OBJS = $(subst .moon,.o,$(MOONSCRIPT_SRCS))
 
 lineup-tracker: lineup-tracker.lua
@@ -45,6 +45,10 @@ install: lineup-tracker
 clean:
 	rm -f src/*.o src/*.mod src/*.lua lineup-tracker lineup-tracker.lua
 .PHONY: clean
+
+check: $(CHECK_SRCS)
+	busted src/
+.PHONY: check
 
 count:
 	@wc -l $$(git ls-files) | sort -nr | head

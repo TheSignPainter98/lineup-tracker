@@ -19,7 +19,6 @@ description = {
 
 source = {
 	url = "git://github.com/TheSignPainter98/lineup-tracker.git",
-	md5 = "1",
 }
 
 supported_platforms = { 'linux' }
